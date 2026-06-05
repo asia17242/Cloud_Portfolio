@@ -13,18 +13,11 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #030712;
+      background-color: #e2e8f0;
       -webkit-tap-highlight-color: transparent;
     }
     .font-futuristic {
       font-family: 'Orbitron', sans-serif;
-    }
-    /* Pulsing stellar glow effect */
-    .glow-purple {
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-    }
-    .glow-blue {
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
     }
     /* Smooth custom scrollbar for mobile prompt history */
     .no-scrollbar::-webkit-scrollbar {
@@ -34,19 +27,201 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* Animated starry background */
+
+    /* Industrial Blueprint Grid Background Override */
     .star-bg {
+      background-color: #cbd5e1 !important;
       background-image: 
-        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-      background-size: 550px 550px, 350px 350px, 250px 250px;
-      background-position: 0 0, 40px 60px, 130px 270px;
-      animation: starMove 100s linear infinite;
+        linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: none !important;
     }
-    @keyframes starMove {
-      from { background-position: 0 0, 40px 60px, 130px 270px; }
-      to { background-position: 550px 550px, 390px 410px, 380px 820px; }
+
+    /* Light Theme Overrides for Text & Fonts */
+    body, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400, .text-slate-100 p {
+      color: #1e293b !important;
+    }
+    .text-slate-400, .text-slate-500 {
+      color: #475569 !important;
+    }
+    .text-slate-600 {
+      color: #64748b !important;
+    }
+
+    /* Brushed Metal Header plate */
+    header {
+      background: linear-gradient(to bottom, #f1f5f9, #e2e8f0) !important;
+      border-bottom: 3px solid #475569 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    }
+    header .bg-gradient-to-tr {
+      background: linear-gradient(135deg, #ff6b00, #e65c00) !important;
+      box-shadow: 0 4px 10px rgba(230, 92, 0, 0.2) !important;
+    }
+    header h1 {
+      background: none !important;
+      -webkit-text-fill-color: #0f172a !important;
+      color: #0f172a !important;
+      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8) !important;
+    }
+    header p {
+      color: #475569 !important;
+    }
+
+    /* Tab Controls */
+    #tab-gemini, #tab-hf {
+      background: #e2e8f0 !important;
+      border: 2px solid #94a3b8 !important;
+      color: #475569 !important;
+      border-radius: 8px !important;
+      transition: all 0.2s ease;
+    }
+    /* Active tab state */
+    #tab-gemini.bg-gradient-to-r, #tab-hf.bg-gradient-to-r {
+      background: linear-gradient(135deg, #ff6b00, #e65c00) !important;
+      border-color: #b34000 !important;
+      color: #ffffff !important;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 0 3px 6px rgba(230, 92, 0, 0.35) !important;
+    }
+
+    /* Brushed Metal Card Panels */
+    .bg-slate-900\/80, .bg-slate-900\/50, .bg-slate-900\/60 {
+      background: linear-gradient(145deg, #f8fafc, #e2e8f0) !important;
+      border: 2px solid #64748b !important;
+      border-radius: 12px !important;
+      box-shadow: 4px 4px 0px #475569, 0 8px 16px rgba(0,0,0,0.05) !important;
+      position: relative;
+    }
+    /* Decorative Rivets */
+    .bg-slate-900\/80::before, .bg-slate-900\/50::before, .bg-slate-900\/60::before {
+      content: '•       •';
+      font-size: 14px;
+      color: #94a3b8;
+      position: absolute;
+      top: 6px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      font-family: monospace;
+      letter-spacing: normal;
+    }
+
+    /* Text highlight to Industrial Orange */
+    .text-purple-300, .text-blue-300, .text-indigo-300, .text-purple-400, .text-indigo-200 {
+      color: #e65c00 !important;
+    }
+    .bg-purple-500\/10 {
+      background: rgba(230, 92, 0, 0.1) !important;
+    }
+    .text-purple-400 {
+      color: #e65c00 !important;
+    }
+    .border-purple-500\/30 {
+      border-color: rgba(230, 92, 0, 0.3) !important;
+    }
+
+    /* Inputs, Selects & Textareas */
+    input, textarea, select {
+      background: #ffffff !important;
+      border: 2px solid #64748b !important;
+      color: #0f172a !important;
+      border-radius: 8px !important;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: #ff6b00 !important;
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2) !important;
+    }
+
+    /* Heavy Duty Industrial Buttons */
+    #generate-trigger {
+      background: linear-gradient(135deg, #ff6b00, #d84a00) !important;
+      border: 2.5px solid #0f172a !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      border-radius: 8px !important;
+      box-shadow: 4px 4px 0px #0f172a !important;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+    }
+    #generate-trigger:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #0f172a !important;
+    }
+    #generate-trigger:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px #0f172a !important;
+    }
+
+    /* AI Optimize Button */
+    button[onclick="optimizePrompt()"] {
+      background: #f1f5f9 !important;
+      color: #e65c00 !important;
+      border: 2px solid #64748b !important;
+      border-radius: 6px !important;
+    }
+    button[onclick="optimizePrompt()"]:hover {
+      background: #e2e8f0 !important;
+    }
+
+    /* Steel color Canvas & placeholders */
+    .bg-slate-950 {
+      background: #1e293b !important;
+      border: 2.5px solid #475569 !important;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.3) !important;
+    }
+    .bg-slate-950 h4 {
+      color: #f1f5f9 !important;
+    }
+
+    /* Star filters style tags */
+    .bg-slate-800 {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border: 1.5px solid #94a3b8 !important;
+      font-weight: 600 !important;
+    }
+    .bg-slate-800:hover {
+      background: #ffebe0 !important;
+      border-color: #ff6b00 !important;
+      color: #e65c00 !important;
+    }
+
+    /* Modal dialog */
+    .modal-card {
+      background: #ffffff !important;
+      border: 4px solid #0f172a !important;
+      border-radius: 16px !important;
+      box-shadow: 8px 8px 0px #0f172a !important;
+      color: #1e293b !important;
+    }
+    .modal-card h3 {
+      color: #e65c00 !important;
+    }
+    .modal-card p {
+      color: #475569 !important;
+    }
+    .modal-card button {
+      background: #e65c00 !important;
+      color: #ffffff !important;
+      border-radius: 8px !important;
+    }
+
+    /* Bottom footer nav override */
+    footer.fixed {
+      background: #e2e8f0 !important;
+      border-top: 3px solid #64748b !important;
+    }
+    footer.fixed button {
+      color: #475569 !important;
+    }
+    footer.fixed button.text-purple-400 {
+      color: #e65c00 !important;
     }
   </style>
 </head>
