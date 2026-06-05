@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Tsai | Cybernetic Web Terminal</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ===== CYBERPUNK METALLIC SYSTEM DESIGN ===== */
+    :root {
+      --cyber-yellow: #fcee0a;
+      --cyber-blue: #00f0ff;
+      --cyber-pink: #ff007f;
+      --cyber-dark: #0a0c10;
+      --metal-light: #4e545c;
+      --metal-mid: #2c3035;
+      --metal-dark: #16181b;
+      --metal-shine: linear-gradient(135deg, #5c626a 0%, #202326 50%, #0d0f10 100%);
+      --metal-border: linear-gradient(135deg, #8f96a0, #40454d 50%, #1a1c1e 100%);
+      --text-glow: 0 0 10px rgba(0, 240, 255, 0.6);
+      --pink-glow: 0 0 10px rgba(255, 0, 127, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Share Tech Mono', 'Orbitron', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background-color: var(--cyber-dark);
+      background-image: 
+        radial-gradient(rgba(0, 240, 255, 0.08) 1.5px, transparent 1.5px),
+        linear-gradient(rgba(10, 12, 16, 0.95) 0%, rgba(10, 12, 16, 0.8) 100%);
+      background-size: 30px 30px, 100% 100%;
+      background-attachment: fixed;
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Scanline effect overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    /* ===== HEADER BAR ===== */
+    .header-bar {
+      width: 100%;
+      background: var(--metal-shine);
+      border-bottom: 3px solid var(--cyber-blue);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+      position: relative;
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 98% 100%, 0 100%);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      font-size: 1.5rem;
+      color: var(--cyber-blue);
+      text-shadow: var(--text-glow);
+      animation: pulse-glow 2s infinite alternate;
+    }
+
+    .logo-text {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-shadow: 1px 1px 0px var(--cyber-pink);
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.85rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #00ff66;
+      box-shadow: 0 0 8px #00ff66;
+      display: inline-block;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 30px;
+      flex: 1;
+    }
+
+    @media (max-width: 900px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== METAL CARD STYLING ===== */
+    .metal-card {
+      background: var(--metal-shine);
+      border: 2px solid #3d434d;
+      position: relative;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      /* Cyberpunk angular cutout corners */
+      clip-path: polygon(
+        0px 0px, 
+        calc(100% - 15px) 0px, 
+        100% 15px, 
+        100% 100%, 
+        15px 100%, 
+        0px calc(100% - 15px)
+      );
+    }
+
+    /* Outer decorative metallic borders and bolts */
+    .metal-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 2px solid var(--metal-light);
+      pointer-events: none;
+      clip-path: polygon(
+        0px 0px, 
+        calc(100% - 15px) 0px, 
+        100% 15px, 
+        100% 100%, 
+        15px 100%, 
+        0px calc(100% - 15px)
+      );
+      z-index: 1;
+    }
+
+    /* Bolt decorations */
+    .bolt {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #4e545c;
+      border: 1px solid #111;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    .bolt-tl { top: 8px; left: 8px; }
+    .bolt-tr { top: 8px; right: 20px; }
+    .bolt-bl { bottom: 20px; left: 8px; }
+    .bolt-br { bottom: 8px; right: 8px; }
+
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--cyber-blue);
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--metal-light);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title::after {
+      content: '//';
+      color: var(--cyber-pink);
+      font-weight: 900;
+    }
+
+    /* ===== LEFT PANEL (PROFILE) ===== */
+    .profile-section {
+      text-align: center;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 10px auto 25px auto;
+    }
+
+    .avatar-scanner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 3px solid var(--cyber-blue);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--text-glow);
+    }
+
+    .avatar-scanner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--cyber-blue);
+      box-shadow: 0 0 10px var(--cyber-blue);
+      animation: scan 2.5s infinite linear;
+    }
+
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--metal-dark);
+      font-size: 4.5rem;
+      color: #3d434d;
+    }
+
+    .avatar-fallback i {
+      text-shadow: 0 0 20px rgba(0,240,255,0.1);
+    }
+
+    .profile-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 6px;
+      text-shadow: 1px 1px 0px var(--cyber-pink), 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    .profile-title {
+      font-size: 0.9rem;
+      color: var(--cyber-blue);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .info-list {
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 10px 0;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    /* ===== RIGHT PANEL (CONTENT TERMINAL) ===== */
+    .cyber-terminal {
+      background: #07090b;
+      border: 2px solid var(--metal-light);
+      border-radius: 4px;
+      flex: 1;
+      padding: 20px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .terminal-header {
+      font-size: 0.85rem;
+      color: #4e545c;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+    }
+
+    .terminal-body {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #a6adbb;
+      flex: 1;
+    }
+
+    .glitch-text {
+      color: #ffffff;
+      font-weight: 900;
+      position: relative;
+      display: inline-block;
+      animation: glitch-anim 4s infinite linear alternate-reverse;
+    }
+
+    /* Typewriter effect for welcome msg */
+    .terminal-welcome {
+      margin-bottom: 24px;
+    }
+
+    .terminal-welcome h2 {
+      font-size: 1.4rem;
+      color: var(--cyber-yellow);
+      margin-bottom: 10px;
+    }
+
+    /* Metallic interactive buttons */
+    .btn-cyber {
+      background: var(--metal-shine);
+      border: 2px solid #5c626a;
+      padding: 10px 20px;
+      color: #ffffff;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-cyber::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--cyber-blue);
+      box-shadow: var(--text-glow);
+    }
+
+    .btn-cyber:hover {
+      border-color: var(--cyber-blue);
+      color: var(--cyber-blue);
+      background: var(--metal-dark);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    /* ===== TIME CONTROL PANEL ===== */
+    .time-panel {
+      margin-top: 24px;
+      background: rgba(10, 12, 16, 0.6);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 4px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .time-panel::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--cyber-pink);
+      box-shadow: var(--pink-glow);
+    }
+
+    .time-display-wrapper {
+      text-align: left;
+    }
+
+    .time-label {
+      font-size: 0.75rem;
+      color: var(--cyber-pink);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    .time-value {
+      font-size: 1.45rem;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    }
+
+    /* ===== FOOTER BAR ===== */
+    footer {
+      width: 100%;
+      background: var(--metal-dark);
+      border-top: 1px solid var(--metal-light);
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #5c626a;
+      margin-top: auto;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes scan {
+      0% { top: 0; }
+      50% { top: 100%; }
+      100% { top: 0; }
+    }
+
+    @keyframes pulse-glow {
+      0% { text-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+      100% { text-shadow: 0 0 20px rgba(0, 240, 255, 0.9); }
+    }
+
+    @keyframes glitch-anim {
+      0% { text-shadow: 1px 1px 0px var(--cyber-pink), -1px -1px 0px var(--cyber-blue); }
+      5% { text-shadow: -2px 1px 0px var(--cyber-pink), 2px -1px 0px var(--cyber-blue); }
+      10% { text-shadow: 1px -2px 0px var(--cyber-pink), -1px 2px 0px var(--cyber-blue); }
+      15% { text-shadow: 0 0 0px var(--cyber-pink), 0 0 0px var(--cyber-blue); }
+      100% { text-shadow: 1px 1px 0px var(--cyber-pink), -1px -1px 0px var(--cyber-blue); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top cyber metallic header bar -->
+  <header class="header-bar">
+    <div class="header-logo">
+      <i class="fa-solid fa-microchip logo-icon"></i>
+      <div class="logo-text">CLTS_NET_V2026</div>
+    </div>
+    
+    <div class="header-status">
+      <div><span class="status-dot"></span> SECURE_PORT_ONLINE</div>
+      <div style="font-family: 'Share Tech Mono';">SYS_VER_9.0.3</div>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <main class="main-container">
+    
+    <!-- Profile & Card Left Column -->
+    <div class="metal-card profile-section">
+      <span class="bolt bolt-tl"></span>
+      <span class="bolt bolt-tr"></span>
+      <span class="bolt bolt-bl"></span>
+      <span class="bolt bolt-br"></span>
+      
+      <div class="card-title">USER_DAT //</div>
+      
+      <div class="avatar-wrapper">
+        <div class="avatar-scanner">
+          <div class="avatar-fallback">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+        </div>
+      </div>
+      
+      <h1 class="profile-name">Cloud Tsai</h1>
+      <div class="profile-title">Cyber explorer</div>
+      
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-label">IDENTIFIER:</span>
+          <span class="info-value" style="color: var(--cyber-yellow);">CT_903_CLD</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">SECTOR:</span>
+          <span class="info-value">Frontend_Dev</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">CLEARANCE:</span>
+          <span class="info-value" style="color: var(--cyber-blue);">LEVEL_5</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">STATUS:</span>
+          <span class="info-value" style="color: #00ff66;">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Interactive Terminal Card -->
+    <div class="metal-card">
+      <span class="bolt bolt-tl"></span>
+      <span class="bolt bolt-tr"></span>
+      <span class="bolt bolt-bl"></span>
+      <span class="bolt bolt-br"></span>
+      
+      <div class="card-title">MAIN_ACCESS_TERMINAL //</div>
+      
+      <div class="cyber-terminal">
+        <div class="terminal-header">
+          <span>HOST: CT_NET_SECURE</span>
+          <span>TTY1 // ACTIVE</span>
+        </div>
+        
+        <div class="terminal-body">
+          <div class="terminal-welcome">
+            <h2>> Hello, I am <span class="glitch-text" style="color: var(--cyber-yellow);">Cloud Tsai</span></h2>
+            <p style="margin-top: 10px;">Welcome to my personal web portal. The portal's UI has been configured with metallic brushed texture plates and cybernetic luminescence protocols.</p>
+          </div>
+          
+          <div style="border-left: 2px dashed rgba(0, 240, 255, 0.3); padding-left: 15px; margin-bottom: 20px;">
+            <p style="color: var(--cyber-blue); font-weight: bold; margin-bottom: 5px;">[ SYSTEM DIAGNOSTICS ]</p>
+            <p>> Multi-agent system online ... <span style="color: #00ff66;">OK</span></p>
+            <p>> Subprojects fully integrated ... <span style="color: #00ff66;">OK</span></p>
+            <p>> Cyber-net connection active ... <span style="color: #00ff66;">OK</span></p>
+          </div>
+
+          <p style="font-style: italic; color: var(--text-muted);">
+            Explore around using the sound-feedback interface systems below, or click diagnostics to check hardware.
+          </p>
+          
+          <button class="btn-cyber" id="btn-sound-trigger">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span>Ping Cybernet</span>
+          </button>
+          
+          <button class="btn-cyber" id="btn-diag-trigger" style="border-color: var(--cyber-pink);">
+            <i class="fa-solid fa-circle-nodes"></i>
+            <span style="color: var(--cyber-pink);">Run Diagnostics</span>
+          </button>
+        </div>
+        
+        <!-- Live Custom Cyber Clock (Specifies User Time initially) -->
+        <div class="time-panel">
+          <div class="time-display-wrapper">
+            <div class="time-label">LOGGED TIME ENTRY</div>
+            <div class="time-value" id="cyber-time-display">2026/05/30 16:30:00</div>
+          </div>
+          <div style="font-size: 1.5rem; color: var(--cyber-pink); animation: pulse-glow 1s infinite alternate;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </main>
+
+  <footer>
+    <p>ANTIGRAVITY CYBER SYSTEM v3.5 // ALL PROTOCOLS SECURED. CLOUD TSAI © 2026</p>
+  </footer>
+
+  <!-- Web Audio Sci-Fi synth & clock ticking -->
+  <script>
+    // Web Audio Synthesizer for sci-fi effects
+    class AudioFeedback {
+      constructor() {
+        this.ctx = null;
+      }
+      
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playPing() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        
+        // Cybernetic high frequency double beep
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1400, now);
+        osc1.frequency.exponentialRampToValueAtTime(3000, now + 0.15);
+        
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(800, now);
+        osc2.frequency.setValueAtTime(1800, now + 0.05);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.26);
+        osc2.stop(now + 0.26);
+      }
+
+      playDiag() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        
+        // Cyber diagnostics hardware sweeps
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.linearRampToValueAtTime(400, now + 0.5);
+        
+        filter.type = 'lowpass';
+        filter.Q.setValueAtTime(15, now);
+        filter.frequency.setValueAtTime(200, now);
+        filter.frequency.exponentialRampToValueAtTime(2000, now + 0.5);
+        
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        
+        osc.start(now);
+        osc.stop(now + 0.6);
+      }
+    }
+
+    const sound = new AudioFeedback();
+
+    // Event listeners
+    document.getElementById('btn-sound-trigger').addEventListener('click', () => {
+      sound.playPing();
+      
+      // Flash cyber blue glow
+      const terminal = document.querySelector('.cyber-terminal');
+      terminal.style.borderColor = 'var(--cyber-blue)';
+      terminal.style.boxShadow = 'inset 0 0 30px rgba(0, 240, 255, 0.2)';
+      setTimeout(() => {
+        terminal.style.borderColor = 'var(--metal-light)';
+        terminal.style.boxShadow = 'inset 0 0 20px rgba(0, 0, 0, 0.9)';
+      }, 500);
+    });
+
+    document.getElementById('btn-diag-trigger').addEventListener('click', () => {
+      sound.playDiag();
+      
+      // Flash pink glow
+      const terminal = document.querySelector('.cyber-terminal');
+      terminal.style.borderColor = 'var(--cyber-pink)';
+      terminal.style.boxShadow = 'inset 0 0 30px rgba(255, 0, 127, 0.2)';
+      setTimeout(() => {
+        terminal.style.borderColor = 'var(--metal-light)';
+        terminal.style.boxShadow = 'inset 0 0 20px rgba(0, 0, 0, 0.9)';
+      }, 600);
+    });
+
+    // Cyber time controller
+    // Start with the specified logged time: 2026/05/30 16:30:00
+    // And tick forward!
+    let baseTime = new Date(2026, 4, 30, 16, 30, 0); // Month is 0-indexed (4 = May)
+    const timeDisplay = document.getElementById('cyber-time-display');
+
+    function updateClock() {
+      baseTime.setSeconds(baseTime.getSeconds() + 1);
+      
+      const year = baseTime.getFullYear();
+      const month = String(baseTime.getMonth() + 1).padStart(2, '0');
+      const day = String(baseTime.getDate()).padStart(2, '0');
+      const hours = String(baseTime.getHours()).padStart(2, '0');
+      const minutes = String(baseTime.getMinutes()).padStart(2, '0');
+      const seconds = String(baseTime.getSeconds()).padStart(2, '0');
+      
+      timeDisplay.innerText = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Ticks every second
+    setInterval(updateClock, 1000);
+  </script>
+
+</body>
+</html>
