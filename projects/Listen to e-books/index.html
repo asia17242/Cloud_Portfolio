@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraReader AI - 書籍雙 Agent 播客與精華萃取器</title>
+
+    <!-- Google Fonts: Outfit (headings), Inter (body), Noto Sans TC (Chinese) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons for premium modern iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- JSZip for browser-side EPUB file extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=1.1">
+</head>
+
+<body>
+    <!-- File Protocol Warning -->
+    <div id="file-protocol-warning"
+        style="display: none; background-color: #ff4d4f; color: white; text-align: center; padding: 12px; font-family: 'Inter', sans-serif; position: relative; z-index: 9999; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <strong>⚠️ 環境警告：</strong> 偵測到您正使用 <code>file:///</code> 協議開啟網頁。這會導致 Gemini API 請求因安全策略 (CORS) 而失敗。請使用 <strong>VS
+            Code Live Server</strong> 或本地 Web 伺服器來執行此專案。
+    </div>
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.getElementById('file-protocol-warning').style.display = 'block';
+        }
+    </script>
+
+    <!-- Ambient Neon Glowing Background Elements -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <div class="app-container">
+        <!-- Main Header -->
+        <header class="main-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div>
+                    <h1>AuraReader AI</h1>
+                    <p class="tagline">書籍雙 Agent 播客與精華萃取平台</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="toggle-settings-btn" class="icon-btn btn-secondary" title="設定 Gemini API">
+                    <i data-lucide="settings"></i>
+                    <span>API 設定</span>
+                </button>
+                <div class="status-badge live-mode-badge" id="app-mode-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text">展示模式 (Demo Mode)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Layout -->
+        <main class="workspace-grid">
+            <!-- Left Panel: Input & Config -->
+            <section class="panel-left">
+                <!-- Source Selection Card -->
+                <div class="card input-source-card" id="input-source-card">
+                    <div class="card-header">
+                        <h2><i data-lucide="book-open"></i> 選擇書籍來源</h2>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tab-headers">
+                        <button class="tab-btn active" data-tab="tab-upload">
+                            <i data-lucide="upload-cloud"></i> 上傳檔案
+                        </button>
+                        <button class="tab-btn" data-tab="tab-paste">
+                            <i data-lucide="align-left"></i> 貼上純文字
+                        </button>
+                        <button class="tab-btn" data-tab="tab-samples">
+                            <i data-lucide="library"></i> 經典範本
+                        </button>
+                    </div>
+
+                    <div class="tab-contents">
+                        <!-- Tab 1: File Upload -->
+                        <div class="tab-pane active" id="tab-upload">
+                            <div class="drag-drop-zone" id="drag-drop-zone">
+                                <div class="zone-icon">
+                                    <i data-lucide="file-text"></i>
+                                </div>
+                                <p class="zone-title">拖曳檔案至此，或<span>點擊瀏覽</span></p>
+                                <p class="zone-desc">支援 .epub / .txt 格式檔案</p>
+                                <input type="file" id="file-input" accept=".epub,.txt" style="display: none;">
+                            </div>
+
+                            <!-- Selected File Info Bar -->
+                            <div class="file-info-bar hidden" id="file-info-bar">
+                                <div class="file-icon"><i data-lucide="file"></i></div>
+                                <div class="file-details">
+                                    <p class="file-name" id="selected-file-name">book_title.epub</p>
+                                    <p class="file-size" id="selected-file-size">1.2 MB</p>
+                                </div>
+                                <button class="close-btn" id="remove-file-btn" title="移除檔案">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Paste Text -->
+                        <div class="tab-pane" id="tab-paste">
+                            <textarea id="raw-text-input" placeholder="請在此貼上書籍段落或長文章內容... (最少 50 字)"></textarea>
+                            <div class="textarea-footer">
+                                <span class="char-counter"><span id="char-count">0</span> 字</span>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Classic Samples -->
+                        <div class="tab-pane" id="tab-samples">
+                            <div class="samples-grid">
+                                <div class="sample-card-btn selected" data-sample="atomic-habits">
+                                    <div class="sample-icon purple"><i data-lucide="flame"></i></div>
+                                    <div class="sample-info">
+                                        <h3>原子習慣</h3>
+                                        <p>James Clear</p>
+                                    </div>
+                                </div>
+                                <div class="sample-card-btn" data-sample="deep-work">
+                                    <div class="sample-icon blue"><i data-lucide="brain-circuit"></i></div>
+                                    <div class="sample-info">
+                                        <h3>深度工作力</h3>
+                                        <p>Cal Newport</p>
+                                    </div>
+                                </div>
+                                <div class="sample-card-btn" data-sample="thinking">
+                                    <div class="sample-icon teal"><i data-lucide="compass"></i></div>
+                                    <div class="sample-info">
+                                        <h3>快思慢想</h3>
+                                        <p>Daniel Kahneman</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameters Settings Card (Accordion Style) -->
+                <div class="card settings-accordion">
+                    <div class="card-header">
+                        <h2><i data-lucide="sliders"></i> 進階設定</h2>
+                    </div>
+                    <div class="settings-content">
+                        <!-- Model Selection -->
+                        <div class="setting-row">
+                            <label for="model-select">Gemini AI 模型</label>
+                            <select id="model-select">
+                                <option value="gemini-2.0-flash" selected>Gemini 2.0 Flash (快速推薦)</option>
+                                <option value="gemini-2.0-pro">Gemini 2.0 Pro (推理分析能力強)</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash (全新速度優化)</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (深度邏輯解析)</option>
+                                <option value="gemini-3.5-flash">Gemini 3.5 Flash (極速與高智慧)</option>
+                            </select>
+                        </div>
+
+                        <!-- Temperature Slider -->
+                        <div class="setting-row">
+                            <div class="label-with-val">
+                                <label for="temperature-slider">創意度 (Temperature)</label>
+                                <span class="slider-val" id="temp-val">0.3</span>
+                            </div>
+                            <input type="range" id="temperature-slider" min="0.0" max="1.0" step="0.1" value="0.3">
+                        </div>
+
+                        <!-- Customize Prompt Toggle -->
+                        <div class="setting-row checkbox-row">
+                            <label class="switch-container">
+                                <input type="checkbox" id="customize-prompt-checkbox">
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="checkbox-label">自訂大綱萃取 Prompt</span>
+                        </div>
+
+                        <!-- Customize Prompt TextArea -->
+                        <div class="setting-row hidden" id="custom-prompt-container">
+                            <textarea id="system-prompt-textarea" placeholder="自訂發送給 Agent 01 的系統指示語..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Run Control Buttons -->
+                <div class="action-buttons-card">
+                    <button class="action-btn btn-primary" id="start-extract-btn" disabled>
+                        <i data-lucide="zap"></i> Agent 01 核心精華萃取
+                    </button>
+                    <button class="action-btn btn-success" id="start-podcast-btn" disabled>
+                        <i data-lucide="mic"></i> Agent 02 播客音訊生成
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results Dashboard -->
+            <section class="panel-right">
+                <div class="card results-card">
+                    <!-- Empty State View -->
+                    <div class="results-empty-state" id="empty-state-view">
+                        <div class="empty-icon"><i data-lucide="sparkles"></i></div>
+                        <h2>尚未開始生成</h2>
+                        <p>請在左側選擇書籍來源（上傳檔案、貼上文字或選擇經典範本），然後點擊下方的「Agent 核心按鈕」開始運作！</p>
+                    </div>
+
+                    <!-- Loading State View -->
+                    <div class="results-loading-state hidden" id="loading-state-view">
+                        <div class="loader-container">
+                            <div class="loader-visual">
+                                <svg class="loader-ring" viewBox="0 0 100 100">
+                                    <circle class="ring-track" cx="50" cy="50" r="45"></circle>
+                                    <circle class="ring-fill" cx="50" cy="50" r="45"></circle>
+                                </svg>
+                                <div class="loader-percentage" id="loader-progress-text">0%</div>
+                            </div>
+                            <h3 id="loading-status-title">正在處理，請稍候...</h3>
+                            <p id="loading-status-desc">說書人 Agent 正在深度閱讀與運算</p>
+                        </div>
+
+                        <!-- Steps Indicators List -->
+                        <div class="loading-steps" id="loading-steps-container">
+                            <!-- Dynamic items injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Results Content View -->
+                    <div class="results-content-view hidden" id="results-view">
+                        <!-- Sub-tabs header -->
+                        <div class="result-tabs">
+                            <button class="result-tab-btn active" id="btn-tab-outline" data-result-tab="outline-view">
+                                <i data-lucide="file-text"></i> 書籍大綱 (Agent 01)
+                            </button>
+                            <button class="result-tab-btn" id="btn-tab-podcast" data-result-tab="podcast-view">
+                                <i data-lucide="headphones"></i> 播客音訊 (Agent 02)
+                            </button>
+                        </div>
+
+                        <!-- Result Tab 1: Outline -->
+                        <div class="result-tab-pane active" id="outline-view">
+                            <div class="outline-scroll-container">
+                                <h2 class="outline-book-title" id="result-book-title-outline"
+                                    style="font-size: 20px; font-weight: 700; margin-bottom: 20px; font-family: var(--font-heading);">
+                                    書籍精華大綱</h2>
+                                <!-- Highlight Banner -->
+                                <section class="section-highlight" id="section-highlight">
+                                    <div class="highlight-quote-mark">“</div>
+                                    <p class="highlight-text" id="result-highlight-text">書籍亮點字句將呈現於此...</p>
+                                </section>
+
+                                <!-- Pain & Solution Deck -->
+                                <section class="section-pain-points" id="section-pain-points">
+                                    <div class="pain-solution-grid">
+                                        <div class="pain-card">
+                                            <h4><i data-lucide="alert-circle"></i> 聽眾痛點共鳴</h4>
+                                            <p id="result-pain-description">痛點描述...</p>
+                                        </div>
+                                        <div class="solve-card">
+                                            <h4><i data-lucide="check-circle"></i> 書籍核心解藥</h4>
+                                            <p id="result-solve-description">解決方案...</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Core Takeaways -->
+                                <section class="section-takeaways" id="section-takeaways">
+                                    <h3 class="section-title">三大核心觀點 (Core Takeaways)</h3>
+                                    <div class="takeaways-container" id="result-takeaways-container">
+                                        <!-- Injected via JS -->
+                                    </div>
+                                </section>
+
+                                <!-- Action Guide -->
+                                <section class="section-action" id="section-action">
+                                    <h3 class="section-title">行動指南 (Actionable Step)</h3>
+                                    <div class="action-card">
+                                        <div class="action-header">
+                                            <div class="action-badge"><i data-lucide="target"></i> 今日小實驗</div>
+                                            <h4 id="result-action-title">行動計畫標題</h4>
+                                        </div>
+                                        <p class="action-desc" id="result-action-desc">行動計畫詳細介紹</p>
+                                        <div class="action-checklist" id="result-action-checklist">
+                                            <!-- Checkbox list items injected via JS -->
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+
+                        <!-- Result Tab 2: Podcast Player & Script -->
+                        <div class="result-tab-pane" id="podcast-view">
+                            <!-- Custom Audio Player Dashboard -->
+                            <div class="audio-player-card">
+                                <!-- Title bar -->
+                                <div class="player-header">
+                                    <div class="player-playing-title">
+                                        <span class="pulse-dot"></span>
+                                        <span id="result-book-title-podcast">說書播客播放中</span>
+                                    </div>
+                                    <div class="player-voice-info">
+                                        配音：微軟曉臻 (HsiaoChen) | 台灣女聲
+                                    </div>
+                                </div>
+
+                                <!-- Visualizer Wave Anim -->
+                                <div class="visualizer-container">
+                                    <div class="visualizer-wave" id="visualizer-wave">
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                    </div>
+                                </div>
+
+                                <!-- Player Status Info -->
+                                <div class="player-status-row">
+                                    <span class="player-status" id="player-status">已載入音訊，準備播放</span>
+                                    <span class="player-time"><span id="player-time-current">0:00</span> / <span
+                                            id="player-time-duration">0:00</span></span>
+                                </div>
+
+                                <!-- Progress Bar Slider -->
+                                <div class="player-progress-container">
+                                    <div class="player-progress-bar-bg" id="player-progress-bg">
+                                        <div class="player-progress-bar" id="player-progress"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Core Controls Row -->
+                                <div class="player-controls-row">
+                                    <!-- Options Box -->
+                                    <div class="player-options">
+                                        <div class="setting-item">
+                                            <label for="player-voice-select">朗讀語音</label>
+                                            <select id="player-voice-select">
+                                                <option value="zh-TW-HsiaoChenNeural" selected>台灣女聲 (曉臻 - 溫雅)</option>
+                                                <option value="zh-TW-YunJheNeural">台灣男聲 (雲哲)</option>
+                                                <option value="zh-CN-XiaoxiaoNeural">大陸女聲 (曉曉)</option>
+                                                <option value="en-US-EmmaNeural">英語女聲 (Emma)</option>
+                                            </select>
+                                        </div>
+                                        <div class="setting-item">
+                                            <label for="player-speed-select">播放速度</label>
+                                            <select id="player-speed-select">
+                                                <option value="0.8">0.8x</option>
+                                                <option value="1.0" selected>1.0x</option>
+                                                <option value="1.2">1.2x</option>
+                                                <option value="1.5">1.5x</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Main Buttons -->
+                                    <div class="player-buttons">
+                                        <button class="player-btn" id="player-btn-prev" title="上一段"><i
+                                                data-lucide="skip-back"></i></button>
+                                        <button class="player-btn btn-play" id="player-btn-play" title="播放"><i
+                                                data-lucide="play"></i></button>
+                                        <button class="player-btn" id="player-btn-stop" title="停止"><i
+                                                data-lucide="square"></i></button>
+                                        <button class="player-btn" id="player-btn-next" title="下一段"><i
+                                                data-lucide="skip-forward"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Script Teleprompter -->
+                            <div class="teleprompter-card">
+                                <div class="teleprompter-header">
+                                    <h3><i data-lucide="text-quote"></i> 說書提詞器 (Teleprompter)</h3>
+                                    <span class="badge">隨音訊播放自動同步滾動</span>
+                                </div>
+                                <div class="teleprompter-content" id="teleprompter-content">
+                                    <!-- Paragraphs with highlighters injected here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions Panel -->
+                        <div class="result-actions-footer">
+                            <button class="footer-btn btn-secondary" id="copy-markdown-btn" title="複製大綱為 Markdown">
+                                <i data-lucide="copy"></i> 複製 Markdown
+                            </button>
+                            <button class="footer-btn btn-secondary" id="download-markdown-btn"
+                                title="下載大綱為 Markdown (.md)">
+                                <i data-lucide="file-down"></i> 下載大綱.md
+                            </button>
+                            <button class="footer-btn btn-secondary" id="download-script-btn" title="下載播客腳本 (.txt)">
+                                <i data-lucide="file-text"></i> 下載腳本.txt
+                            </button>
+                            <button class="footer-btn btn-secondary" id="download-mp3-btn" title="下載完整播客語音" disabled>
+                                <i data-lucide="music"></i> 下載音訊.mp3
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Hidden Audio Node for Background TTS chunk loading -->
+    <audio id="podcast-audio" style="display: none;"></audio>
+
+    <!-- API Settings Drawer/Modal Overlay -->
+    <div class="settings-drawer-overlay hidden" id="api-settings-card">
+        <div class="settings-drawer">
+            <div class="drawer-header">
+                <h2><i data-lucide="key-round"></i> Gemini API 設定</h2>
+                <button class="close-btn" id="close-settings-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="drawer-body">
+                <p class="drawer-desc">填入您的 Gemini API Key 來啟動實機模式。金鑰將安全地儲存在本機瀏覽器的 LocalStorage 中，絕不上傳至任何第三方伺服器。</p>
+
+                <div class="form-group">
+                    <label for="api-key-input">Gemini API Key</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="api-key-input" placeholder="AIzaSy...">
+                        <button class="toggle-password-btn" id="toggle-api-key-visibility" title="顯示/隱藏金鑰">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-alert">
+                    <i data-lucide="info"></i>
+                    <span>未設定 API Key 時，您依然可以切換到「經典範本」分頁，在展示模式 (Demo Mode) 下體驗完整的語音播放與視覺動畫。</span>
+                </div>
+
+                <button class="drawer-save-btn" id="save-settings-btn">儲存並套用</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Toast Notification Alert -->
+    <div class="toast hidden" id="toast">
+        <div class="toast-icon"><i data-lucide="info"></i></div>
+        <div class="toast-message">提示訊息</div>
+    </div>
+
+    <script src="app.js?v=1.1"></script>
+</body>
+
+</html>
