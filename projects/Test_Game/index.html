@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINECRAFT TRIS - 麥塊方塊</title>
+  <!-- 引入 Google Fonts 像素字體 Press Start 2P -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS 麥塊 GUI 設計系統 */
+    :root {
+      --bg-color: #181818;
+      --gui-bg: #c6c6c6;
+      --gui-dark: #373737;
+      --text-white: #ffffff;
+      --text-dark: #2d2d2d;
+      --text-yellow: #ffff55;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      image-rendering: pixelated; /* 強制像素化渲染 */
+    }
+
+    body {
+      background: radial-gradient(circle at center, #3c3c3c 0%, #111111 100%);
+      color: var(--text-white);
+      font-family: 'Press Start 2P', monospace;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .game-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* 麥塊風格 Logo */
+    .logo {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #c6c6c6;
+      text-shadow: 4px 4px 0px #3c3c3c;
+    }
+
+    /* 主容器排版 */
+    .main-container {
+      display: flex;
+      flex-direction: row;
+      gap: 30px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* 遊戲面板容器 (加大尺寸：400px 寬 x 800px 高 + 8px 邊框) */
+    .board-container {
+      position: relative;
+      width: 408px; 
+      height: 808px;
+      overflow: hidden;
+      border: 4px solid #373737;
+      border-right-color: #ffffff;
+      border-bottom-color: #ffffff;
+      background: #8b8b8b;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    #game-board {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 右側資訊側欄 (寬度加大) */
+    .sidebar {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 麥塊 GUI 控制面板 (凸起浮雕效果) */
+    .panel {
+      background: var(--gui-bg);
+      border: 4px solid #555555;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      border-bottom-color: #000000;
+      border-right-color: #000000;
+      padding: 20px;
+      margin-bottom: 16px;
+      color: var(--text-dark);
+      box-shadow: inset 4px 4px 0px rgba(255, 255, 255, 0.4), 
+                  inset -4px -4px 0px rgba(0, 0, 0, 0.15),
+                  0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      border-bottom: 2px solid #555555;
+      padding-bottom: 6px;
+    }
+
+    /* 下一個方塊的凹槽圍邊 (寬度加大) */
+    .canvas-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #8b8b8b;
+      border: 4px solid #373737;
+      border-right-color: #ffffff;
+      border-bottom-color: #ffffff;
+      padding: 12px;
+    }
+
+    #next-piece {
+      background: transparent;
+    }
+
+    .stats-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #555555;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0000ff; /* 青金石藍 */
+    }
+
+    #score {
+      color: #00aaaa; /* 鑽石青 */
+    }
+
+    #high-score {
+      color: #aa0000; /* 紅石紅 */
+    }
+
+    #level {
+      color: #00aa00; /* 綠色等級 */
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* 麥塊 GUI 按鈕 */
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      background: #8b8b8b;
+      border: 4px solid #555555;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      border-bottom-color: #000000;
+      border-right-color: #000000;
+      color: #e0e0e0;
+      text-shadow: 2px 2px 0px #373737;
+      padding: 14px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      border-radius: 0px;
+    }
+
+    .btn:hover {
+      background: #a8a8a8;
+      color: #ffffff;
+    }
+
+    .btn:active {
+      background: #707070;
+      border-top-color: #000000;
+      border-left-color: #000000;
+      border-bottom-color: #ffffff;
+      border-right-color: #ffffff;
+      text-shadow: none;
+      padding-top: 15px;
+      padding-left: 15px;
+      padding-bottom: 13px;
+      padding-right: 13px;
+    }
+
+    .btn-glow {
+      background: #55aa55; /* 麥塊綠 */
+      border-top-color: #88ff88;
+      border-left-color: #88ff88;
+      border-bottom-color: #225522;
+      border-right-color: #225522;
+      color: #ffffff;
+      text-shadow: 2px 2px 0px #225522;
+    }
+
+    .btn-glow:hover {
+      background: #66cc66;
+    }
+
+    .btn-side {
+      width: 100%;
+    }
+
+    /* 麥塊 GUI 覆蓋視窗 */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(16, 16, 16, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .overlay-content {
+      background: var(--gui-bg);
+      border: 4px solid #555555;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      border-bottom-color: #000000;
+      border-right-color: #000000;
+      color: var(--text-dark);
+      width: 320px; /* 加大覆蓋視窗 */
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: inset 4px 4px 0px rgba(255, 255, 255, 0.4), 
+                  inset -4px -4px 0px rgba(0, 0, 0, 0.15),
+                  0 12px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .overlay-content h1 {
+      font-size: 14px;
+      margin: 0;
+      color: var(--text-dark);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .overlay-content h2 {
+      font-size: 16px;
+      margin: 0;
+      letter-spacing: 0.5px;
+      color: #aa0000; /* 紅石紅 */
+    }
+
+    .score-display {
+      font-size: 22px;
+      font-weight: 700;
+      color: #00aaaa; /* 鑽石青 */
+      margin: 5px 0;
+    }
+
+    /* 操作說明 */
+    .help-panel {
+      font-size: 8px;
+      line-height: 1.6;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 10px;
+      align-items: center;
+    }
+
+    .key {
+      background: #8b8b8b;
+      border: 2px solid #555555;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      border-bottom-color: #000000;
+      border-right-color: #000000;
+      padding: 4px;
+      font-weight: bold;
+      display: inline-block;
+      min-width: 18px;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    /* 行動裝置虛擬按鍵 */
+    .virtual-controller {
+      display: none;
+      margin-top: 15px;
+      width: 408px; /* 隨畫布加大而加大 */
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      z-index: 5;
+    }
+
+    .v-btn {
+      background: #8b8b8b;
+      border: 3px solid #555555;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      border-bottom-color: #000000;
+      border-right-color: #000000;
+      color: #fff;
+      padding: 14px 0;
+      font-size: 8px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .v-btn:active {
+      background: #707070;
+      border-top-color: #000000;
+      border-left-color: #000000;
+      border-bottom-color: #ffffff;
+      border-right-color: #ffffff;
+      padding-top: 16px;
+      padding-bottom: 12px;
+    }
+
+    /* 響應式排版 */
+    @media (max-width: 760px) {
+      .logo {
+        font-size: 1.6rem;
+        margin-bottom: 15px;
+      }
+
+      .main-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+      
+      .board-container {
+        width: 308px; /* 行動端自動縮小為 300px 寬 */
+        height: 608px;
+      }
+
+      .sidebar {
+        width: 308px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      
+      .stats-panel, .next-panel {
+        margin-bottom: 0 !important;
+      }
+      
+      .help-panel {
+        grid-column: span 2;
+      }
+      
+      .controls-panel {
+        grid-column: span 2;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        margin-bottom: 0;
+      }
+
+      .virtual-controller {
+        display: grid;
+        width: 308px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-wrapper">
+    <div class="logo">MINECRAFT TRIS</div>
+    
+    <div class="main-container">
+      <!-- 遊戲區域與遮罩層 -->
+      <div class="board-container">
+        <!-- Canvas 解析度加大為 400x800 -->
+        <canvas id="game-board" width="400" height="800"></canvas>
+        
+        <!-- 開始畫面遮罩 -->
+        <div id="start-overlay" class="overlay active">
+          <div class="overlay-content">
+            <h1>MINECRAFT TRIS</h1>
+            <p style="text-align: center;">疊起各種經典麥塊方塊！</p>
+            <button id="start-btn" class="btn btn-glow">START GAME</button>
+          </div>
+        </div>
+        
+        <!-- 暫停畫面遮罩 -->
+        <div id="pause-overlay" class="overlay">
+          <div class="overlay-content">
+            <h1>GAME PAUSED</h1>
+            <p>PRESS P OR CLICK RESUME</p>
+            <button id="resume-btn" class="btn btn-glow">RESUME</button>
+          </div>
+        </div>
+        
+        <!-- 結束畫面遮罩 -->
+        <div id="game-over-overlay" class="overlay">
+          <div class="overlay-content">
+            <h2 class="text-danger">GAME OVER</h2>
+            <p>FINAL SCORE</p>
+            <div id="final-score" class="score-display">0</div>
+            <button id="restart-btn" class="btn btn-glow">PLAY AGAIN</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 資訊側邊欄 -->
+      <div class="sidebar">
+        <!-- 下一個方塊預覽 (預覽畫布加大) -->
+        <div class="panel next-panel">
+          <div class="panel-title">NEXT BLOCK</div>
+          <div class="canvas-wrapper">
+            <canvas id="next-piece" width="160" height="160"></canvas>
+          </div>
+        </div>
+        
+        <!-- 遊戲數據 -->
+        <div class="panel stats-panel">
+          <div class="stat-item">
+            <div class="stat-label">SCORE</div>
+            <div id="score" class="stat-value">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">HIGH SCORE</div>
+            <div id="high-score" class="stat-value">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">LINES</div>
+            <div id="lines" class="stat-value">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">LEVEL</div>
+            <div id="level" class="stat-value">1</div>
+          </div>
+        </div>
+        
+        <!-- 操作按鈕 -->
+        <div class="controls-panel">
+          <button id="play-pause-btn" class="btn btn-side">PAUSE (P)</button>
+          <button id="mute-btn" class="btn btn-side">SOUND: ON</button>
+        </div>
+
+        <!-- 鍵盤操作說明 -->
+        <div class="panel help-panel">
+          <div class="panel-title">CONTROLS</div>
+          <div class="help-grid">
+            <div><span class="key">←</span> <span class="key">→</span></div>
+            <div>MOVE</div>
+            <div><span class="key">↑</span></div>
+            <div>ROTATE</div>
+            <div><span class="key">↓</span></div>
+            <div>SOFT DROP</div>
+            <div><span class="key">SPACE</span></div>
+            <div>HARD DROP</div>
+            <div><span class="key">P</span></div>
+            <div>PAUSE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 行動裝置虛擬按鍵 -->
+    <div class="virtual-controller">
+      <button id="v-left" class="v-btn">←</button>
+      <button id="v-rotate" class="v-btn">ROTATE</button>
+      <button id="v-right" class="v-btn">→</button>
+      <button id="v-down" class="v-btn">↓</button>
+      <button id="v-drop" class="v-btn">DROP</button>
+    </div>
+  </div>
+
+  <script>
+    // --- 可愛泡泡音效管理器 (Web Audio API Synthesizer) ---
+    const Sound = {
+      ctx: null,
+      enabled: true,
+      
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      
+      playMove() {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(360, this.ctx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.04);
+      },
+      
+      playRotate() {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(480, this.ctx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.06);
+      },
+      
+      playDrop() {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(90, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      },
+      
+      playClear(lines) {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const playTone = (freq, start, duration, volume) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(volume, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        
+        if (lines === 4) {
+          // 四行消除 特效音
+          playTone(523.25, now, 0.08, 0.1);         // C5
+          playTone(659.25, now + 0.05, 0.08, 0.1);   // E5
+          playTone(783.99, now + 0.10, 0.08, 0.1);   // G5
+          playTone(1046.50, now + 0.15, 0.25, 0.15); // C6
+        } else {
+          playTone(523.25, now, 0.1, 0.1);         // C5
+          playTone(659.25, now + 0.06, 0.2, 0.1);    // E5
+        }
+      },
+      
+      playLevelUp() {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const playTone = (freq, start, duration) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, start);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.6, start + duration);
+          gain.gain.setValueAtTime(0.08, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playTone(392.00, now, 0.12); // G4
+        playTone(523.25, now + 0.08, 0.25); // C5
+      },
+      
+      playGameOver() {
+        if (!this.enabled || !this.ctx) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const playTone = (freq, start, duration) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, start);
+          osc.frequency.linearRampToValueAtTime(freq - 100, start + duration);
+          gain.gain.setValueAtTime(0.1, start);
+          gain.gain.linearRampToValueAtTime(0.001, start + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playTone(329.63, now, 0.2); // E4
+        playTone(293.66, now + 0.2, 0.2); // D4
+        playTone(261.63, now + 0.4, 0.5); // C4
+      }
+    };
+
+    // --- 遊戲邏輯與核心常數 (方塊大小加大為 40px, 預覽方塊加大為 32px) ---
+    const BOARD_COLS = 10;
+    const BOARD_ROWS = 20;
+    const BLOCK_SIZE = 40;
+    const NEXT_BLOCK_SIZE = 32;
+    const LOCK_DELAY_MS = 500;
+    const MAX_LOCK_RESETS = 15;
+    const CLEAR_ANIM_DURATION = 200; // 毫秒
+
+    // 標準 Tetrominoes
+    const SHAPES = {
+      I: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ],
+      O: [
+        [1, 1],
+        [1, 1]
+      ],
+      T: [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+      S: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+      ],
+      Z: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+      ],
+      J: [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+      L: [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+      ]
+    };
+
+    // 麥塊方塊樣式類型對照表
+    const BLOCK_TYPES = {
+      I: 'diamond',
+      O: 'gold',
+      T: 'obsidian',
+      S: 'creeper',
+      Z: 'redstone',
+      J: 'lapis',
+      L: 'tnt'
+    };
+
+    // 麥塊 8x8 像素風格紋理庫
+    const BLOCK_TEXTURES = {
+      diamond: {
+        palette: ['#64f2e3', '#37c6c4', '#e5fffa', '#18828c'],
+        pixels: [
+          [2, 2, 2, 2, 2, 2, 2, 0],
+          [2, 0, 0, 0, 0, 0, 0, 3],
+          [2, 0, 1, 1, 1, 1, 0, 3],
+          [2, 0, 1, 2, 2, 1, 0, 3],
+          [2, 0, 1, 2, 0, 1, 0, 3],
+          [2, 0, 1, 1, 1, 3, 0, 3],
+          [2, 0, 0, 0, 0, 0, 3, 3],
+          [0, 3, 3, 3, 3, 3, 3, 3]
+        ]
+      },
+      gold: {
+        palette: ['#fdf130', '#cfa90c', '#fffb9f', '#8c7004'],
+        pixels: [
+          [2, 2, 2, 2, 2, 2, 2, 0],
+          [2, 0, 0, 0, 0, 0, 0, 3],
+          [2, 0, 1, 1, 1, 1, 0, 3],
+          [2, 0, 1, 2, 2, 1, 0, 3],
+          [2, 0, 1, 2, 0, 1, 0, 3],
+          [2, 0, 1, 1, 1, 3, 0, 3],
+          [2, 0, 0, 0, 0, 0, 3, 3],
+          [0, 3, 3, 3, 3, 3, 3, 3]
+        ]
+      },
+      obsidian: {
+        palette: ['#15111e', '#100c16', '#3c245c', '#54127a'],
+        pixels: [
+          [1, 0, 1, 1, 2, 1, 1, 0],
+          [0, 1, 2, 1, 1, 3, 2, 1],
+          [1, 2, 1, 0, 1, 2, 1, 1],
+          [1, 1, 0, 1, 2, 1, 3, 0],
+          [2, 1, 1, 3, 1, 1, 2, 1],
+          [1, 3, 2, 1, 0, 2, 1, 1],
+          [1, 2, 1, 1, 2, 1, 0, 1],
+          [0, 1, 1, 2, 1, 1, 1, 2]
+        ]
+      },
+      creeper: {
+        palette: ['#4da64d', '#398039', '#151c15', '#8cdf8c'],
+        pixels: [
+          [0, 3, 0, 0, 3, 0, 3, 0],
+          [3, 0, 0, 3, 0, 0, 0, 3],
+          [0, 2, 2, 0, 0, 2, 2, 0],
+          [0, 2, 2, 0, 0, 2, 2, 0],
+          [0, 0, 0, 2, 2, 0, 0, 0],
+          [0, 0, 2, 2, 2, 2, 0, 0],
+          [0, 0, 2, 0, 0, 2, 0, 0],
+          [3, 0, 0, 3, 0, 0, 3, 0]
+        ]
+      },
+      redstone: {
+        palette: ['#cc1111', '#990000', '#ff5555', '#720000'],
+        pixels: [
+          [2, 2, 2, 2, 2, 2, 2, 0],
+          [2, 0, 0, 0, 0, 0, 0, 3],
+          [2, 0, 1, 1, 1, 1, 0, 3],
+          [2, 0, 1, 2, 2, 1, 0, 3],
+          [2, 0, 1, 2, 0, 1, 0, 3],
+          [2, 0, 1, 1, 1, 3, 0, 3],
+          [2, 0, 0, 0, 0, 0, 3, 3],
+          [0, 3, 3, 3, 3, 3, 3, 3]
+        ]
+      },
+      lapis: {
+        palette: ['#14318c', '#0d2263', '#ffd400', '#2954cc'],
+        pixels: [
+          [0, 1, 0, 3, 0, 1, 0, 3],
+          [1, 0, 2, 0, 1, 0, 0, 1],
+          [0, 3, 0, 1, 0, 3, 2, 0],
+          [3, 0, 1, 0, 3, 1, 0, 3],
+          [0, 1, 0, 2, 0, 1, 0, 1],
+          [1, 0, 3, 0, 1, 0, 3, 0],
+          [0, 2, 0, 1, 0, 2, 0, 3],
+          [3, 0, 3, 0, 3, 0, 1, 0]
+        ]
+      },
+      tnt: {
+        palette: ['#cc1111', '#ffffff', '#000000', '#8c8c8c'],
+        pixels: [
+          [0, 3, 0, 3, 0, 3, 0, 3],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [2, 2, 2, 1, 2, 1, 2, 2],
+          [1, 2, 1, 2, 2, 1, 1, 2],
+          [1, 2, 1, 2, 1, 2, 1, 2],
+          [0, 3, 0, 3, 0, 3, 0, 3]
+        ]
+      }
+    };
+
+    // 遊戲狀態變數
+    let board = Array.from({ length: BOARD_ROWS }, () => Array(BOARD_COLS).fill(0));
+    let score = 0;
+    let highScore = 0;
+    let linesCleared = 0;
+    let level = 1;
+    let isGameOver = false;
+    let isPaused = false;
+    let gameStarted = false;
+
+    // 當前方塊與下一個方塊資料
+    let currentPiece = {
+      matrix: null,
+      type: '',
+      x: 0,
+      y: 0
+    };
+
+    let nextPiece = {
+      matrix: null,
+      type: ''
+    };
+
+    // 隨機7包生成器
+    let bag = [];
+
+    // 時間計數器與鎖定延遲 (Lock Delay) 變數
+    let lastTime = 0;
+    let dropCounter = 0;
+    let isGrounded = false;
+    let lockDelayTimer = 0;
+    let lockResetCount = 0;
+
+    // 消行動畫變數
+    let clearingLines = [];
+    let clearAnimTimer = 0;
+
+    // Canvas 初始化
+    const mainCanvas = document.getElementById('game-board');
+    const ctx = mainCanvas.getContext('2d');
+    const nextCanvas = document.getElementById('next-piece');
+    const nextCtx = nextCanvas.getContext('2d');
+
+    // 遮罩層 DOM
+    const startOverlay = document.getElementById('start-overlay');
+    const pauseOverlay = document.getElementById('pause-overlay');
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    
+    // 按鈕 DOM
+    const startBtn = document.getElementById('start-btn');
+    const resumeBtn = document.getElementById('resume-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    // 讀取 localStorage 紀錄的最高分
+    try {
+      highScore = parseInt(localStorage.getItem('tetris_high_score') || '0', 10);
+      if (isNaN(highScore)) highScore = 0;
+    } catch (e) {
+      highScore = 0;
+    }
+    document.getElementById('high-score').textContent = highScore;
+
+    // --- 麥塊 8x8 像素風格方塊繪製邏輯 ---
+    function drawBlockAtCoords(ctx, px, py, blockTypeName, size, isGhost = false) {
+      const tex = BLOCK_TEXTURES[blockTypeName];
+      if (!tex) return;
+      
+      const pixelSize = size / 8; // 將方塊分成 8x8 像素格
+      
+      ctx.save();
+      
+      if (isGhost) {
+        ctx.globalAlpha = 0.3; // 影子方塊：30% 透明度的像素全息投影
+      }
+      
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const colorIdx = tex.pixels[r][c];
+          ctx.fillStyle = tex.palette[colorIdx];
+          
+          // 繪製微型像素格
+          ctx.fillRect(
+            px + c * pixelSize, 
+            py + r * pixelSize, 
+            pixelSize + 0.1, 
+            pixelSize + 0.1
+          );
+        }
+      }
+      
+      ctx.restore();
+    }
+
+    function drawBlock(ctx, gridX, gridY, blockTypeName, size, isGhost = false) {
+      drawBlockAtCoords(ctx, gridX * size, gridY * size, blockTypeName, size, isGhost);
+    }
+
+    // --- 7-Bag 隨機取得方塊種類 ---
+    function getNextPieceType() {
+      if (bag.length === 0) {
+        bag = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+        for (let i = bag.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [bag[i], bag[j]] = [bag[j], bag[i]];
+        }
+      }
+      return bag.pop();
+    }
+
+    // --- 初始化方塊狀態 ---
+    function initPieces() {
+      const t1 = getNextPieceType();
+      currentPiece.type = t1;
+      currentPiece.matrix = SHAPES[t1];
+      currentPiece.x = Math.floor((BOARD_COLS - currentPiece.matrix[0].length) / 2);
+      currentPiece.y = t1 === 'I' ? -1 : 0;
+      
+      const t2 = getNextPieceType();
+      nextPiece.type = t2;
+      nextPiece.matrix = SHAPES[t2];
+    }
+
+    // --- 產生下一個方塊 ---
+    function spawnNewPiece() {
+      currentPiece.type = nextPiece.type;
+      currentPiece.matrix = nextPiece.matrix;
+      currentPiece.x = Math.floor((BOARD_COLS - currentPiece.matrix[0].length) / 2);
+      currentPiece.y = currentPiece.type === 'I' ? -1 : 0;
+      
+      if (checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y, board)) {
+        gameOver();
+        return;
+      }
+      
+      const t = getNextPieceType();
+      nextPiece.type = t;
+      nextPiece.matrix = SHAPES[t];
+      
+      drawNextPiece();
+      
+      isGrounded = false;
+      lockDelayTimer = 0;
+      lockResetCount = 0;
+    }
+
+    // --- 碰撞偵測 ---
+    function checkCollision(matrix, px, py, boardState) {
+      for (let r = 0; r < matrix.length; r++) {
+        for (let c = 0; c < matrix[r].length; c++) {
+          if (matrix[r][c] !== 0) {
+            const nextX = px + c;
+            const nextY = py + r;
+            
+            if (nextX < 0 || nextX >= BOARD_COLS || nextY >= BOARD_ROWS) {
+              return true;
+            }
+            
+            if (nextY >= 0 && boardState[nextY][nextX]) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    // --- 計算投影方塊 (Ghost Piece) y 座標 ---
+    function getGhostY() {
+      let ghostY = currentPiece.y;
+      while (!checkCollision(currentPiece.matrix, currentPiece.x, ghostY + 1, board)) {
+        ghostY++;
+      }
+      return ghostY;
+    }
+
+    // --- 矩形順時針旋轉旋轉 ---
+    function rotateMatrix(matrix) {
+      const n = matrix.length;
+      const rotated = Array.from({ length: n }, () => Array(n).fill(0));
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          rotated[c][n - 1 - r] = matrix[r][c];
+        }
+      }
+      return rotated;
+    }
+
+    // --- 方塊移動與旋轉控制邏輯 ---
+    function moveLeft() {
+      if (isGameOver || isPaused || clearingLines.length > 0) return;
+      if (!checkCollision(currentPiece.matrix, currentPiece.x - 1, currentPiece.y, board)) {
+        currentPiece.x--;
+        Sound.playMove();
+        
+        if (checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y + 1, board)) {
+          if (lockResetCount < MAX_LOCK_RESETS) {
+            lockDelayTimer = 0;
+            lockResetCount++;
+          }
+        } else {
+          isGrounded = false;
+          lockDelayTimer = 0;
+        }
+      }
+    }
+
+    function moveRight() {
+      if (isGameOver || isPaused || clearingLines.length > 0) return;
+      if (!checkCollision(currentPiece.matrix, currentPiece.x + 1, currentPiece.y, board)) {
+        currentPiece.x++;
+        Sound.playMove();
+        
+        if (checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y + 1, board)) {
+          if (lockResetCount < MAX_LOCK_RESETS) {
+            lockDelayTimer = 0;
+            lockResetCount++;
+          }
+        } else {
+          isGrounded = false;
+          lockDelayTimer = 0;
+        }
+      }
+    }
+
+    function moveDown() {
+      if (isGameOver || isPaused || clearingLines.length > 0) return false;
+      if (!checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y + 1, board)) {
+        currentPiece.y++;
+        isGrounded = false;
+        lockDelayTimer = 0;
+        lockResetCount = 0;
+        return true;
+      }
+      return false;
+    }
+
+    function rotate() {
+      if (isGameOver || isPaused || clearingLines.length > 0) return;
+      
+      const originalMatrix = currentPiece.matrix;
+      const rotatedMatrix = rotateMatrix(originalMatrix);
+      
+      const kickOffsets = [
+        {x: 0, y: 0},
+        {x: -1, y: 0},
+        {x: 1, y: 0},
+        {x: 0, y: -1},
+        {x: -2, y: 0},
+        {x: 2, y: 0}
+      ];
+      
+      for (let offset of kickOffsets) {
+        if (!checkCollision(rotatedMatrix, currentPiece.x + offset.x, currentPiece.y + offset.y, board)) {
+          currentPiece.matrix = rotatedMatrix;
+          currentPiece.x += offset.x;
+          currentPiece.y += offset.y;
+          
+          Sound.playRotate();
+          
+          if (checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y + 1, board)) {
+            if (lockResetCount < MAX_LOCK_RESETS) {
+              lockDelayTimer = 0;
+              lockResetCount++;
+            }
+          } else {
+            isGrounded = false;
+            lockDelayTimer = 0;
+          }
+          return;
+        }
+      }
+    }
+
+    function hardDrop() {
+      if (isGameOver || isPaused || clearingLines.length > 0) return;
+      
+      let droppedRows = 0;
+      while (!checkCollision(currentPiece.matrix, currentPiece.x, currentPiece.y + 1, board)) {
+        currentPiece.y++;
+        droppedRows++;
+      }
+      
+      score += droppedRows * 2;
+      Sound.playDrop();
+      lockPiece();
+      updateScoreUI();
+    }
+
+    // --- 鎖定方塊與消行判定 ---
+    function lockPiece() {
+      const typeName = BLOCK_TYPES[currentPiece.type];
+      for (let r = 0; r < currentPiece.matrix.length; r++) {
+        for (let c = 0; c < currentPiece.matrix[r].length; c++) {
+          if (currentPiece.matrix[r][c] !== 0) {
+            const boardY = currentPiece.y + r;
+            const boardX = currentPiece.x + c;
+            
+            if (boardY < 0) {
+              gameOver();
+              return;
+            }
+            board[boardY][boardX] = typeName;
+          }
+        }
+      }
+      
+      checkLines();
+    }
+
+    // 檢查滿行
+    function checkLines() {
+      clearingLines = [];
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        let isRowFull = true;
+        for (let c = 0; c < BOARD_COLS; c++) {
+          if (!board[r][c]) {
+            isRowFull = false;
+            break;
+          }
+        }
+        if (isRowFull) {
+          clearingLines.push(r);
+        }
+      }
+      
+      if (clearingLines.length > 0) {
+        Sound.playClear(clearingLines.length);
+        clearAnimTimer = 0;
+      } else {
+        spawnNewPiece();
+      }
+    }
+
+    // 移除滿行並結算分數與等級
+    function removeClearedLines() {
+      const numLines = clearingLines.length;
+      const baseScores = [0, 100, 300, 500, 800];
+      
+      score += baseScores[numLines] * level;
+      linesCleared += numLines;
+      
+      const nextLevel = Math.floor(linesCleared / 10) + 1;
+      if (nextLevel > level) {
+        level = nextLevel;
+        Sound.playLevelUp();
+      }
+      
+      const newBoard = board.filter((_, idx) => !clearingLines.includes(idx));
+      while (newBoard.length < BOARD_ROWS) {
+        newBoard.unshift(Array(BOARD_COLS).fill(0));
+      }
+      board = newBoard;
+      
+      updateScoreUI();
+    }
+
+    // 計算下落速度
+    function getDropInterval() {
+      return Math.max(80, 1000 - (level - 1) * 90);
+    }
+
+    // 更新分數與 UI
+    function updateScoreUI() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('lines').textContent = linesCleared;
+      document.getElementById('level').textContent = level;
+      
+      if (score > highScore) {
+        highScore = score;
+        try {
+          localStorage.setItem('tetris_high_score', highScore);
+        } catch (e) {}
+      }
+      document.getElementById('high-score').textContent = highScore;
+    }
+
+    // --- 繪製畫面 (Draw Cycle) ---
+    function draw() {
+      ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+      
+      // 1. 繪製麥塊物品凹槽欄格 (LED 網格插槽效果)
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          if (!board[r][c]) {
+            const x = c * BLOCK_SIZE;
+            const y = r * BLOCK_SIZE;
+            
+            // 填充凹槽灰
+            ctx.fillStyle = '#8b8b8b';
+            ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+            
+            // 凹槽陰影 (上方與左方)
+            ctx.fillStyle = '#373737';
+            ctx.fillRect(x, y, BLOCK_SIZE, 2);
+            ctx.fillRect(x, y, 2, BLOCK_SIZE);
+            
+            // 凹槽高光 (下方與右方)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y + BLOCK_SIZE - 2, BLOCK_SIZE, 2);
+            ctx.fillRect(x + BLOCK_SIZE - 2, y, 2, BLOCK_SIZE);
+          }
+        }
+      }
+      
+      // 2. 繪製已固定的麥塊方塊
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const typeName = board[r][c];
+          if (typeName) {
+            drawBlock(ctx, c, r, typeName, BLOCK_SIZE);
+          }
+        }
+      }
+      
+      // 3. 繪製移動中的方塊與投影影子
+      if (currentPiece.matrix && !isGameOver && clearingLines.length === 0) {
+        const typeName = BLOCK_TYPES[currentPiece.type];
+        const ghostY = getGhostY();
+        
+        // 繪製全息像素影子 (30% 透明度)
+        for (let r = 0; r < currentPiece.matrix.length; r++) {
+          for (let c = 0; c < currentPiece.matrix[r].length; c++) {
+            if (currentPiece.matrix[r][c] !== 0) {
+              if (ghostY + r >= 0) {
+                drawBlock(ctx, currentPiece.x + c, ghostY + r, typeName, BLOCK_SIZE, true);
+              }
+            }
+          }
+        }
+        
+        // 繪製本體
+        for (let r = 0; r < currentPiece.matrix.length; r++) {
+          for (let c = 0; c < currentPiece.matrix[r].length; c++) {
+            if (currentPiece.matrix[r][c] !== 0) {
+              if (currentPiece.y + r >= 0) {
+                drawBlock(ctx, currentPiece.x + c, currentPiece.y + r, typeName, BLOCK_SIZE, false);
+              }
+            }
+          }
+        }
+      }
+      
+      // 4. 繪製消行閃爍覆蓋層
+      if (clearingLines.length > 0) {
+        const opacity = 1 - (clearAnimTimer / CLEAR_ANIM_DURATION);
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.8})`;
+        for (let row of clearingLines) {
+          ctx.fillRect(0, row * BLOCK_SIZE, mainCanvas.width, BLOCK_SIZE);
+        }
+      }
+    }
+
+    // 繪製下一個預覽方塊
+    function drawNextPiece() {
+      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      
+      if (!nextPiece.matrix) return;
+      
+      const matrix = nextPiece.matrix;
+      const n = matrix.length;
+      const typeName = BLOCK_TYPES[nextPiece.type];
+      
+      // 置中計算
+      let minR = n, maxR = -1, minC = n, maxC = -1;
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (matrix[r][c] !== 0) {
+            if (r < minR) minR = r;
+            if (r > maxR) maxR = r;
+            if (c < minC) minC = c;
+            if (c > maxC) maxC = c;
+          }
+        }
+      }
+      
+      if (maxR === -1) return;
+      
+      const blockW = maxC - minC + 1;
+      const blockH = maxR - minR + 1;
+      const startX = (nextCanvas.width - blockW * NEXT_BLOCK_SIZE) / 2;
+      const startY = (nextCanvas.height - blockH * NEXT_BLOCK_SIZE) / 2;
+      
+      for (let r = minR; r <= maxR; r++) {
+        for (let c = minC; c <= maxC; c++) {
+          if (matrix[r][c] !== 0) {
+            const drawX = startX + (c - minC) * NEXT_BLOCK_SIZE;
+            const drawY = startY + (r - minR) * NEXT_BLOCK_SIZE;
+            drawBlockAtCoords(nextCtx, drawX, drawY, typeName, NEXT_BLOCK_SIZE, false);
+          }
+        }
+      }
+    }
+
+    // --- 遊戲循環 (Game Loop) ---
+    function gameLoop(time) {
+      if (isGameOver || isPaused || !gameStarted) return;
+      
+      const deltaTime = time - lastTime;
+      lastTime = time;
+      
+      // 處理消行動畫
+      if (clearingLines.length > 0) {
+        clearAnimTimer += deltaTime;
+        if (clearAnimTimer >= CLEAR_ANIM_DURATION) {
+          removeClearedLines();
+          spawnNewPiece();
+          clearingLines = [];
+          clearAnimTimer = 0;
+        }
+        draw();
+        requestAnimationFrame(gameLoop);
+        return;
+      }
+      
+      // 重力下降
+      dropCounter += deltaTime;
+      const currentInterval = getDropInterval();
+      if (dropCounter >= currentInterval) {
+        if (!moveDown()) {
+          isGrounded = true;
+        }
+        dropCounter = 0;
+      }
+      
+      // 著地延遲鎖定
+      if (isGrounded) {
+        lockDelayTimer += deltaTime;
+        if (lockDelayTimer >= LOCK_DELAY_MS) {
+          lockPiece();
+          isGrounded = false;
+          lockDelayTimer = 0;
+          lockResetCount = 0;
+        }
+      }
+      
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // --- 遊戲狀態控制 ---
+    function startGame() {
+      Sound.init();
+      
+      board = Array.from({ length: BOARD_ROWS }, () => Array(BOARD_COLS).fill(0));
+      score = 0;
+      linesCleared = 0;
+      level = 1;
+      isGameOver = false;
+      isPaused = false;
+      gameStarted = true;
+      
+      startOverlay.classList.remove('active');
+      pauseOverlay.classList.remove('active');
+      gameOverOverlay.classList.remove('active');
+      
+      playPauseBtn.textContent = 'PAUSE (P)';
+      
+      bag = [];
+      initPieces();
+      drawNextPiece();
+      updateScoreUI();
+      
+      lastTime = performance.now();
+      dropCounter = 0;
+      isGrounded = false;
+      lockDelayTimer = 0;
+      lockResetCount = 0;
+      clearingLines = [];
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    function togglePause() {
+      if (!gameStarted || isGameOver) return;
+      
+      isPaused = !isPaused;
+      if (isPaused) {
+        pauseOverlay.classList.add('active');
+        playPauseBtn.textContent = 'RESUME';
+      } else {
+        pauseOverlay.classList.remove('active');
+        playPauseBtn.textContent = 'PAUSE (P)';
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // 遊戲結束
+    function gameOver() {
+      isGameOver = true;
+      Sound.playGameOver();
+      document.getElementById('final-score').textContent = score;
+      gameOverOverlay.classList.add('active');
+    }
+
+    function toggleMute() {
+      Sound.enabled = !Sound.enabled;
+      muteBtn.textContent = Sound.enabled ? 'SOUND: ON' : 'SOUND: OFF';
+      Sound.init();
+    }
+
+    // --- 事件監聽器綁定 ---
+    
+    // 遮罩層按鈕
+    startBtn.addEventListener('click', startGame);
+    resumeBtn.addEventListener('click', togglePause);
+    restartBtn.addEventListener('click', startGame);
+    
+    // 側邊欄按鈕
+    playPauseBtn.addEventListener('click', togglePause);
+    muteBtn.addEventListener('click', toggleMute);
+
+    // 鍵盤操控監聽
+    window.addEventListener('keydown', function(e) {
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.code) > -1) {
+        e.preventDefault();
+      }
+      
+      if (!gameStarted) {
+        if (e.code === 'Enter' || e.code === 'Space') {
+          startGame();
+        }
+        return;
+      }
+
+      if (e.code === 'KeyP') {
+        togglePause();
+        return;
+      }
+      
+      if (isGameOver) {
+        if (e.code === 'Enter' || e.code === 'Space') {
+          startGame();
+        }
+        return;
+      }
+      
+      if (isPaused) return;
+      
+      switch (e.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+          moveLeft();
+          break;
+        case 'ArrowRight':
+        case 'KeyD':
+          moveRight();
+          break;
+        case 'ArrowUp':
+        case 'KeyW':
+          rotate();
+          break;
+        case 'ArrowDown':
+        case 'KeyS':
+          if (moveDown()) {
+            score += 1;
+            updateScoreUI();
+          } else {
+            isGrounded = true;
+          }
+          break;
+        case 'Space':
+          hardDrop();
+          break;
+      }
+      draw();
+    });
+
+    // 行動裝置虛擬按鍵
+    const setupVirtualBtn = (id, action) => {
+      const btn = document.getElementById(id);
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        Sound.init();
+        if (!gameStarted || isGameOver || isPaused) return;
+        action();
+        draw();
+      });
+    };
+
+    setupVirtualBtn('v-left', moveLeft);
+    setupVirtualBtn('v-right', moveRight);
+    setupVirtualBtn('v-rotate', rotate);
+    setupVirtualBtn('v-down', () => {
+      if (moveDown()) {
+        score += 1;
+        updateScoreUI();
+      } else {
+        isGrounded = true;
+      }
+    });
+    setupVirtualBtn('v-drop', hardDrop);
+
+    // 初始渲染空白網格
+    draw();
+  </script>
+</body>
+</html>
