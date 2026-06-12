@@ -27,10 +27,10 @@ A machine learning project following the **CRISP-DM** methodology to predict sta
 | **Objective** | Predict startup profit and identify key budget drivers |
 | **Dataset** | Kaggle 50 Startups (50 records, 5 features) |
 | **Methodology** | CRISP-DM (Cross-Industry Standard Process for Data Mining) |
-| **Best Model** | **Ridge Regression (alpha=1.0)** |
+| **Best Model** | **Lasso Regression (alpha=1000.0)** |
 | **Robust Validation** | **5-Fold Cross-Validation** |
-| **5-Fold CV R²** | **0.9326** (+/- 0.0420) |
-| **MAE / RMSE (CV)** | **$7,976** / **$10,436** |
+| **5-Fold CV R²** | **0.9394** (+/- 0.0382) |
+| **MAE / RMSE (CV)** | **$7,391** / **$9,923** |
 
 ---
 
@@ -57,7 +57,11 @@ A machine learning project following the **CRISP-DM** methodology to predict sta
 ├── notebooks/
 │   └── EDA.ipynb                 # Jupyter Notebook with full CRISP-DM analysis
 ├── src/
-│   └── eda.py                    # Data preparation, VIF check, and model comparison script
+│   ├── eda.py                    # Data preparation, VIF check, and feature selection script
+│   └── model_selection_10_schemes.py # 10 model selection schemes validation script
+├── reports/
+│   ├── model_selection_comparison.md  # Feature selection comparison report
+│   └── model_selection_10_schemes.md   # 10 model selection schemes report
 ├── assets/                       # Statically generated EDA and evaluation charts
 ├── app.py                        # Bilingual Streamlit interactive dashboard
 ├── index.html                    # Presentation slides (HTML/CSS)
@@ -107,7 +111,7 @@ streamlit run app.py
 
 ## 💡 Key Business Insights
 
-1.  **R&D Spend** is the primary profit driver (standardized coefficient **+$33,497**). Every $1 standard deviation increase in R&D spend yields highest ROI.
-2.  **Marketing Spend** is the secondary driver (standardized coefficient **+$7,602**).
-3.  **Administration** expenses have negligible or slightly negative correlation to profit (**-$1,268**). Administrative costs should be controlled.
-4.  **State Location** (Florida, New York vs. California) has minimal effect (<3% variance) on company profit.
+1.  **R&D Spend** is the primary profit driver (standardized coefficient **+$34,884**). Every $1 standard deviation increase in R&D spend yields the highest ROI.
+2.  **Marketing Spend** is the secondary driver (standardized coefficient **+$5,554**).
+3.  **Administration** expenses have negligible or slightly negative correlation to profit (**-$729**). Administrative costs should be controlled.
+4.  **State Location** (Florida, New York vs. California) has its coefficients shrunk to exactly **$0**, proving that location has zero marginal impact on profit in this dataset.

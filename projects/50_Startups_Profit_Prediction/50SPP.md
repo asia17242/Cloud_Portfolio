@@ -1,6 +1,6 @@
 # 50 Startups Profit Prediction
 
-> **Ridge Regression** · **CRISP-DM Methodology** · **5-Fold Cross-Validation**
+> **Lasso Regression** · **CRISP-DM Methodology** · **5-Fold Cross-Validation**
 > 預測新創企業獲利，分析 R&D、行政、行銷支出與州別對 Profit 的影響
 
 ---
@@ -32,9 +32,9 @@
 | **Objective** | Predict startup profit using historical data |
 | **Dataset** | Kaggle 50 Startups (50 records, 5 features) |
 | **Methodology** | CRISP-DM (Cross-Industry Standard Process for Data Mining) |
-| **Best Model** | Ridge Regression (alpha=1.0) |
-| **5-Fold CV R²** | **0.9326** (+/- 0.0420) |
-| **CV MAE / RMSE** | $7,976 / $10,436 |
+| **Best Model** | Lasso Regression (alpha=1000.0) |
+| **5-Fold CV R²** | **0.9394** (+/- 0.0382) |
+| **CV MAE / RMSE** | $7,391 / $9,923 |
 
 ### Business Questions
 
@@ -48,9 +48,9 @@
 
 | Metric | Target | Actual (CV) | Status |
 |--------|--------|:-----------:|:------:|
-| R² > 0.90 | 0.90 | **0.9326** | ✅ |
-| MAE (minimize) | — | $7,976 | ✅ |
-| RMSE (minimize) | — | $10,436 | ✅ |
+| R² > 0.90 | 0.90 | **0.9394** | ✅ |
+| MAE (minimize) | — | $7,391 | ✅ |
+| RMSE (minimize) | — | $9,923 | ✅ |
 
 ---
 
@@ -62,15 +62,15 @@
 
 | ML 指標 | 對 CFO/投資人的意義 |
 |---------|-------------------|
-| **R² = 0.93** | 模型可解釋 93% 的獲利變異。若只用平均值猜測，誤差約 $40K；使用模型可將誤差降至 **$10K 以內** |
-| **MAE = $7,976** | 每次預測平均偏差不到 $8K，對於數十萬到百萬級的預算決策，誤差率約 **5–8%** |
-| **RMSE = $10,436** | 較大偏差的懲罰；RMSE 接近 MAE 表示無嚴重離群預測干擾 |
+| **R² = 0.94** | 模型可解釋 94% 的獲利變異。若只用平均值猜測，誤差約 $40K；使用模型可將誤差降至 **$10K 以內** |
+| **MAE = $7,391** | 每次預測平均偏差不到 $7.4K，對於數十萬到百萬級的預算決策，誤差率約 **5–7%** |
+| **RMSE = $9,923** | 較大偏差的懲罰；RMSE 接近 MAE 表示無嚴重離群預測干擾 |
 
 ### 2.2 商業衡量指標 (Business KPIs)
 
 | KPI | 衡量方式 | 預期效益 |
 |-----|---------|---------|
-| **預算配置效率** | 模型建議 vs 實際配置的 Profit 差異 | 預測準確度 ±$8K，可將預算偏移降至 5% 內 |
+| **預算配置效率** | 模型建議 vs 實際配置的 Profit 差異 | 預測準確度 ±$7.4K，可將預算偏移降至 5% 內 |
 | **財務規劃工時** | 每次預算調整所需人工分析時間 | 從 8 小時降至 <1 分鐘（自動化預測） |
 | **投資報酬率預測** | 每增加 $1 R&D 對應的預測 Profit 增量 | 提供量化依據，避免盲目投資 |
 | **敏感度分析** | 變動單一支出時 Profit 的變化幅度 | 支援 What-If 模擬決策 |
@@ -80,8 +80,8 @@
 > [!WARNING]
 > **本模型為線性靜態模型，使用時須注意以下限制：**
 
-| 風險 | 說明 | 緩解方式 |
-|------|------|---------|
+| Risk | Description | Mitigation |
+|------|-------------|------------|
 | **R&D 遞延效應** | 模型假設 R&D 支出與 Profit 為同期關係。實際上 R&D 投資通常需 6–18 個月才能轉化為營收 | 建議搭配時間序列分析驗證滯後效應 |
 | **過度投資風險** | 線性模型無法預測「過度投資 R&D 導致現金流斷裂」，係數在極端值範圍外可能不成立 | 預測值應作為輔助參考，搭配現金流壓力測試 |
 | **樣本代表性** | n=50 來自 Kaggle 公開數據，未必反映特定產業或地區的新創生態 | 建議收集自有數據重新訓練，或使用遷移學習 |
@@ -101,7 +101,7 @@
 | Missing Values | 0 |
 
 > [!CAUTION]
-> **樣本限制 (N=50)：** 本數據集僅含 50 筆樣本，80/20 分割後測試集僅 10 筆。單次測試指標波動大，因此本專案以 **5-Fold Cross-Validation** 作為主要評估依據（CV R²=0.9326），而非單次 Test R²。即便如此，模型泛化至其他新創生態系時仍須謹慎。
+> **樣本限制 (N=50)：** 本數據集僅含 50 筆樣本，80/20 分割後測試集僅 10 筆。單次測試指標波動大，因此本專案以 **5-Fold Cross-Validation** 作為主要評估依據（CV R²=0.9394），而非單次 Test R²。即便如此，模型泛化至其他新創生態系時仍須謹慎。
 
 ### Feature Description
 
@@ -191,22 +191,22 @@ preprocessor = ColumnTransformer([
 | Model | Hyperparameter | Search Range |
 |-------|---------------|--------------|
 | Linear Regression | — | — |
-| Ridge (L2) | alpha | [0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0] |
-| Lasso (L1) | alpha | [0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0] |
+| Ridge (L2) | alpha | np.logspace(-3, 3, 13) |
+| Lasso (L1) | alpha | np.logspace(-3, 3, 13) |
 
 ### 6.2 Model Comparison (5-Fold CV)
 
 | Model | CV R² | CV MAE | CV RMSE | Test R² | Best Alpha |
 |-------|:-----:|:------:|:-------:|:-------:|:----------:|
-| Linear Regression | 0.9304 ± 0.0446 | $8,039 | $10,624 | 0.8746 | N/A |
-| **Ridge** | **0.9326 ± 0.0420** | **$7,976** | **$10,436** | 0.8592 | **1.0** |
-| Lasso | 0.9314 ± 0.0434 | $8,003 | $10,551 | 0.8821 | 100.0 |
+| Linear Regression | 0.9304 ± 0.0446 | $8,039 | $10,574 | 0.8746 | N/A |
+| Ridge | 0.9326 ± 0.0420 | $7,976 | $10,436 | 0.8592 | 1.0000 |
+| **Lasso** | **0.9394 ± 0.0382** | **$7,391** | **$9,923** | **0.9053** | **1000.0** |
 
-### 6.3 Winner: Ridge Regression (alpha=1.0)
+### 6.3 Winner: Lasso Regression (alpha=1000.0)
 
-- **最低 CV MAE ($7,976)** 與 **最高 CV R² (0.9326)**
-- L2 正則化有效抑制共線性造成的係數膨脹
-- 相比 Linear Regression 標準差更小 (0.0420 vs 0.0446)，穩定度更佳
+- **最低 CV MAE ($7,391)** 與 **最高 CV R² (0.9394)**
+- L1 正則化有效將不重要的 `State` 特徵係數壓縮至 exactamente 0，實現了特徵自動篩選並降低過擬合。
+- 相比 Linear Regression 與 Ridge 標準差更小 (0.0382)，在 CV folds 間表現最穩定。
 
 ---
 
@@ -218,9 +218,9 @@ preprocessor = ColumnTransformer([
 
 | 特徵 | 原始係數 | 標準化後係數 | 比較性 |
 |------|:--------:|:-----------:|:------:|
-| R&D Spend | +0.76 | **+33,497** | ✅ 可直接比較 |
-| Marketing Spend | +0.05 | **+7,602** | ✅ |
-| Administration | -0.06 | **-1,268** | ✅ |
+| R&D Spend | +0.76 | **+34,884** | ✅ 可直接比較 |
+| Marketing Spend | +0.05 | **+5,554** | ✅ |
+| Administration | -0.06 | **-729** | ✅ |
 
 > 標準化後，所有係數的單位為「Profit 變動量 per 1 std of feature」，可直接比大小。
 
@@ -239,19 +239,17 @@ preprocessor = ColumnTransformer([
 > [!NOTE]
 > - VIF < 5：無嚴重共線性
 > - R&D (3.47) 與 Marketing (3.57) 存在**中度相關**（源自原始 r=0.78）
-> - Ridge 的 L2 正則化可自動處理此問題，無需刪除變數
+> - Lasso 能自動過濾此問題，並篩除不具貢獻的特徵變數
 
 ### 7.3 正則化軌跡
 
 ```
-Ridge:  alpha=0.01 → CV R²=0.9308
-        alpha=0.1  → CV R²=0.9320
-        alpha=1.0  → CV R²=0.9326  ← best
-        alpha=10.0 → CV R²=0.9298
-        alpha=100  → CV R²=0.8921  (過度正則化)
+Ridge:  alpha=0.01  → CV R²=0.9308
+        alpha=1.0   → CV R²=0.9326  ← best
+        alpha=1000  → CV R²=0.8590  (過度正則化)
 
-Lasso:  alpha=0.01 → CV R²=0.9304
-        alpha=100  → CV R²=0.9314  ← best (稀疏解逼近 Ridge)
+Lasso:  alpha=0.01  → CV R²=0.9304
+        alpha=1000  → CV R²=0.9394  ← best (變數稀疏，自動篩除 State)
 ```
 
 ---
@@ -262,34 +260,34 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 
 | Metric | 5-Fold CV | Test Set |
 |--------|:---------:|:--------:|
-| **R²** | **0.9326** ± 0.0420 | 0.8592 |
-| **MAE** | **$7,976** | $8,539 |
-| **RMSE** | **$10,436** | $10,679 |
+| **R²** | **0.9394** ± 0.0382 | 0.9053 |
+| **MAE** | **$7,391** | $7,144 |
+| **RMSE** | **$9,923** | $8,759 |
 
 ### 8.2 Sample Predictions (Test Set)
 
 | Actual | Predicted | Error |
 |-------:|----------:|------:|
-| $134,307 | $128,904 | $5,403 |
-| $81,006 | $88,407 | -$7,401 |
-| $99,938 | $95,136 | $4,801 |
+| $134,307 | $126,976 | $7,331 |
+| $81,006 | $85,204 | -$4,199 |
+| $99,938 | $97,812 | $2,125 |
 
 ---
 
 ## 9. Feature Importance
 
-使用**標準化後的 Ridge 係數**（可直接比較）：
+使用**標準化後的 Lasso 係數**（可直接比較）：
 
 | Rank | Feature | Coefficient | Interpretation |
 |:----:|---------|:-----------:|----------------|
-| 1 | **R&D Spend** | **+33,497** | 每增加 1 std R&D，Profit 增加 $33.5K |
-| 2 | Marketing Spend | +7,602 | 次要正向因子 |
-| 3 | State_New York | -3,647 | 相較 California 略低 |
-| 4 | State_Florida | -3,119 | 相較 California 略低 |
-| 5 | Administration | -1,268 | 影響最小，負向 |
+| 1 | **R&D Spend** | **+34,884** | 每增加 1 std R&D，Profit 增加 $34.9K |
+| 2 | Marketing Spend | +5,554 | 次要正向因子 |
+| 3 | Administration | -729 | 影響極小，輕微負向 |
+| 4 | State_Florida | 0 | 經 L1 收縮直接判定無顯著邊際貢獻 |
+| 5 | State_New York | 0 | 經 L1 收縮直接判定無顯著邊際貢獻 |
 
 > [!IMPORTANT]
-> R&D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 **4.4 倍**，證實 R&D 是獲利的最主要驅動力。
+> R&D 的標準化係數 (34,884) 約為 Marketing (5,554) 的 **6.3 倍**，證實 R&D 創新投入是獲利的最主要且最重要驅動力。
 
 > Feature importance 圖表：[`assets/feature_importance.png`](./assets/feature_importance.png)
 
@@ -299,13 +297,14 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 
 | Statistic | Value |
 |-----------|:-----:|
-| Mean | $3,246 |
-| Std | $10,174 |
-| Min | -$15,531 |
-| Max | $19,728 |
+| Mean | $1,911 |
+| Std | $8,548 |
+| Min | -$14,074 |
+| Max | $16,630 |
 
 - **Residual Plot**: 殘差隨機分布於零線兩側，無明顯異質變異
-- **Q-Q Plot**: 殘差近似常態分布（輕微右尾偏差）
+- **Q-Q Plot**: 殘差近似常態分布
+- Lasso 模型的殘差指標均大幅優於無正則化的多元線性回歸
 
 > Residual analysis 圖表：[`assets/residual_analysis.png`](./assets/residual_analysis.png)
 
@@ -318,9 +317,9 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 ```
 User Input → Streamlit Frontend → Preprocessor (StandardScaler + OneHotEncoder)
                                        ↓
-                              Ridge Regression Model
+                               Lasso Regression Model
                                        ↓
-                              Profit Prediction → Plotly Dashboard
+                               Profit Prediction → Plotly Dashboard
 ```
 
 ### 11.2 Technology Stack
@@ -328,7 +327,7 @@ User Input → Streamlit Frontend → Preprocessor (StandardScaler + OneHotEncod
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Streamlit |
-| ML Engine | Scikit-Learn (Ridge, Pipeline) |
+| ML Engine | Scikit-Learn (Lasso, Pipeline) |
 | Visualization | Plotly, Matplotlib, Seaborn |
 | Evaluation | 5-Fold Cross-Validation, GridSearchCV, VIF |
 
@@ -348,7 +347,7 @@ User Input → Streamlit Frontend → Preprocessor (StandardScaler + OneHotEncod
 | State | California |
 
 ```
-Predicted Profit: ~$180,500
+Predicted Profit: ~$178,000
 ```
 
 ---
@@ -357,30 +356,29 @@ Predicted Profit: ~$180,500
 
 ### Key Findings
 
-1. **R&D Spend** 為最強預測因子（標準化係數 33,497，是 Marketing 的 4.4 倍）
-2. **Marketing Spend** 為次要因子（7,602）
-3. **Administration** 影響最小（-1,268），甚至呈輕微負向
-4. **State** 影響有限（Florida -3,119, New York -3,647 vs California 基準）
+1. **R&D Spend** 為最強預測因子（標準化係數 34,884，是 Marketing 的 6.3 倍）
+2. **Marketing Spend** 為次要因子（5,554）
+3. **Administration** 影響極微（-729），呈輕微負向
+4. **State** 被 L1 歸零，表明在控制預算後，州別對 Profit 無額外預測力
 
 ### Business Insights
 
 企業若希望提升獲利：
 
-1. **優先增加 R&D 投資** — 每 $1 投入約可帶來 $0.76 獲利
-2. **其次 Marketing** — 仍有顯著正向效果
-3. **避免過度增加 Administration** — 邊際效益極低且可能為負
-4. **地理位置非關鍵因素** — 不應作為主要投資決策依據
+1. **優先增加 R&D 創新投資** — 其 ROI 具有最高回報潛能
+2. **行銷配置** — 作為次要推動力以帶來正向收益
+3. **精簡行政營運費用** — 降低無謂開銷，避免利潤被不必要的運作侵蝕
+4. **地理位置非關鍵因素** — 不應為了州別差異而影響公司總部的預算配置決策
 
 ### Model Formula (Standardized Scale)
 
 ```
-Profit = 117,824
-        + 33,497 × Z(R&D Spend)
-        + 7,602  × Z(Marketing Spend)
-        - 3,647  × State_New York
-        - 3,119  × State_Florida
-        - 1,268  × Z(Administration)
+Profit = 115,652
+        + 34,884 × Z(R&D Spend)
+        + 5,554  × Z(Marketing Spend)
+        - 729    × Z(Administration)
 ```
+*(State Florida & New York coefficients were set to 0.0 by Lasso Regression and dropped from the equation)*
 
 ---
 
@@ -389,10 +387,16 @@ Profit = 117,824
 ```
 50_Startups_Profit_Prediction/
 ├── 50SPP.md                   # 本文件 — 專案摘要
+├── 50PP.md                    # 專案摘要 (備份)
 ├── README.md                  # 快速入門說明
 ├── data/50_Startups.csv       # 原始資料集
 ├── notebooks/EDA.ipynb        # Jupyter Notebook
-├── src/eda.py                 # EDA + 模型訓練腳本
+├── src/
+│   ├── eda.py                 # EDA + 特徵選擇腳本
+│   └── model_selection_10_schemes.py # 10 種模型選擇評估腳本
+├── reports/
+│   ├── model_selection_comparison.md  # 特徵選擇比較分析報告
+│   └── model_selection_10_schemes.md   # 10 種驗證方案對比報告
 ├── app.py                     # Streamlit Web 應用程式
 ├── index.html                 # HTML 簡報
 ├── assets/*.png               # 視覺化圖表
@@ -432,4 +436,4 @@ Python 3.14 · Scikit-Learn 1.3+ · Streamlit 1.28+ · Plotly 5.15+ · statsmode
 
 ---
 
-> **Built with CRISP-DM Methodology · 5-Fold Cross-Validation · Ridge Regularization · 2026**
+> **Built with CRISP-DM Methodology · 5-Fold Cross-Validation · Lasso Regularization · 2026**

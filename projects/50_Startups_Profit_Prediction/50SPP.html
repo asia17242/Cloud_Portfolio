@@ -33,7 +33,7 @@
 <body>
 <h1>50 Startups Profit Prediction</h1>
 <blockquote>
-<p><strong>Ridge Regression</strong> · <strong>CRISP-DM Methodology</strong> · <strong>5-Fold Cross-Validation</strong>
+<p><strong>Lasso Regression</strong> · <strong>CRISP-DM Methodology</strong> · <strong>5-Fold Cross-Validation</strong>
 預測新創企業獲利，分析 R&amp;D、行政、行銷支出與州別對 Profit 的影響</p>
 </blockquote>
 <hr />
@@ -79,15 +79,15 @@
 </tr>
 <tr>
 <td><strong>Best Model</strong></td>
-<td>Ridge Regression (alpha=1.0)</td>
+<td>Lasso Regression (alpha=1000.0)</td>
 </tr>
 <tr>
 <td><strong>5-Fold CV R²</strong></td>
-<td><strong>0.9326</strong> (+/- 0.0420)</td>
+<td><strong>0.9394</strong> (+/- 0.0382)</td>
 </tr>
 <tr>
 <td><strong>CV MAE / RMSE</strong></td>
-<td>$7,976 / $10,436</td>
+<td>$7,391 / $9,923</td>
 </tr>
 </tbody>
 </table>
@@ -113,19 +113,19 @@
 <tr>
 <td>R² &gt; 0.90</td>
 <td>0.90</td>
-<td style="text-align: center;"><strong>0.9326</strong></td>
+<td style="text-align: center;"><strong>0.9394</strong></td>
 <td style="text-align: center;">✅</td>
 </tr>
 <tr>
 <td>MAE (minimize)</td>
 <td>—</td>
-<td style="text-align: center;">$7,976</td>
+<td style="text-align: center;">$7,391</td>
 <td style="text-align: center;">✅</td>
 </tr>
 <tr>
 <td>RMSE (minimize)</td>
 <td>—</td>
-<td style="text-align: center;">$10,436</td>
+<td style="text-align: center;">$9,923</td>
 <td style="text-align: center;">✅</td>
 </tr>
 </tbody>
@@ -143,15 +143,15 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>R² = 0.93</strong></td>
-<td>模型可解釋 93% 的獲利變異。若只用平均值猜測，誤差約 $40K；使用模型可將誤差降至 <strong>$10K 以內</strong></td>
+<td><strong>R² = 0.94</strong></td>
+<td>模型可解釋 94% 的獲利變異。若只用平均值猜測，誤差約 $40K；使用模型可將誤差降至 <strong>$10K 以內</strong></td>
 </tr>
 <tr>
-<td><strong>MAE = $7,976</strong></td>
-<td>每次預測平均偏差不到 $8K，對於數十萬到百萬級的預算決策，誤差率約 <strong>5–8%</strong></td>
+<td><strong>MAE = $7,391</strong></td>
+<td>每次預測平均偏差不到 $7.4K，對於數十萬到百萬級的預算決策，誤差率約 <strong>5–7%</strong></td>
 </tr>
 <tr>
-<td><strong>RMSE = $10,436</strong></td>
+<td><strong>RMSE = $9,923</strong></td>
 <td>較大偏差的懲罰；RMSE 接近 MAE 表示無嚴重離群預測干擾</td>
 </tr>
 </tbody>
@@ -169,7 +169,7 @@
 <tr>
 <td><strong>預算配置效率</strong></td>
 <td>模型建議 vs 實際配置的 Profit 差異</td>
-<td>預測準確度 ±$8K，可將預算偏移降至 5% 內</td>
+<td>預測準確度 ±$7.4K，可將預算偏移降至 5% 內</td>
 </tr>
 <tr>
 <td><strong>財務規劃工時</strong></td>
@@ -196,9 +196,9 @@
 <table>
 <thead>
 <tr>
-<th>風險</th>
-<th>說明</th>
-<th>緩解方式</th>
+<th>Risk</th>
+<th>Description</th>
+<th>Mitigation</th>
 </tr>
 </thead>
 <tbody>
@@ -255,7 +255,7 @@
 </table>
 <blockquote>
 <p>[!CAUTION]
-<strong>樣本限制 (N=50)：</strong> 本數據集僅含 50 筆樣本，80/20 分割後測試集僅 10 筆。單次測試指標波動大，因此本專案以 <strong>5-Fold Cross-Validation</strong> 作為主要評估依據（CV R²=0.9326），而非單次 Test R²。即便如此，模型泛化至其他新創生態系時仍須謹慎。</p>
+<strong>樣本限制 (N=50)：</strong> 本數據集僅含 50 筆樣本，80/20 分割後測試集僅 10 筆。單次測試指標波動大，因此本專案以 <strong>5-Fold Cross-Validation</strong> 作為主要評估依據（CV R²=0.9394），而非單次 Test R²。即便如此，模型泛化至其他新創生態系時仍須謹慎。</p>
 </blockquote>
 <h3>Feature Description</h3>
 <table>
@@ -400,11 +400,11 @@
 <hr />
 <h2>5. Data Preparation</h2>
 <h3>5.1 Pipeline Design</h3>
-<pre class="codehilite"><code class="language-python">preprocessor = ColumnTransformer([
-    ('num', StandardScaler(), ['R&amp;D Spend', 'Administration', 'Marketing Spend']),
-    ('cat', OneHotEncoder(drop='first'), ['State'])
-])
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;num&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="p">[</span><span class="s1">&#39;R&amp;D Spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Administration&#39;</span><span class="p">,</span> <span class="s1">&#39;Marketing Spend&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">])</span>
+<span class="p">])</span>
+</code></pre></div>
 
 <table>
 <thead>
@@ -475,12 +475,12 @@
 <tr>
 <td>Ridge (L2)</td>
 <td>alpha</td>
-<td>[0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0]</td>
+<td>np.logspace(-3, 3, 13)</td>
 </tr>
 <tr>
 <td>Lasso (L1)</td>
 <td>alpha</td>
-<td>[0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0]</td>
+<td>np.logspace(-3, 3, 13)</td>
 </tr>
 </tbody>
 </table>
@@ -501,33 +501,33 @@
 <td>Linear Regression</td>
 <td style="text-align: center;">0.9304 ± 0.0446</td>
 <td style="text-align: center;">$8,039</td>
-<td style="text-align: center;">$10,624</td>
+<td style="text-align: center;">$10,574</td>
 <td style="text-align: center;">0.8746</td>
 <td style="text-align: center;">N/A</td>
 </tr>
 <tr>
-<td><strong>Ridge</strong></td>
-<td style="text-align: center;"><strong>0.9326 ± 0.0420</strong></td>
-<td style="text-align: center;"><strong>$7,976</strong></td>
-<td style="text-align: center;"><strong>$10,436</strong></td>
+<td>Ridge</td>
+<td style="text-align: center;">0.9326 ± 0.0420</td>
+<td style="text-align: center;">$7,976</td>
+<td style="text-align: center;">$10,436</td>
 <td style="text-align: center;">0.8592</td>
-<td style="text-align: center;"><strong>1.0</strong></td>
+<td style="text-align: center;">1.0000</td>
 </tr>
 <tr>
-<td>Lasso</td>
-<td style="text-align: center;">0.9314 ± 0.0434</td>
-<td style="text-align: center;">$8,003</td>
-<td style="text-align: center;">$10,551</td>
-<td style="text-align: center;">0.8821</td>
-<td style="text-align: center;">100.0</td>
+<td><strong>Lasso</strong></td>
+<td style="text-align: center;"><strong>0.9394 ± 0.0382</strong></td>
+<td style="text-align: center;"><strong>$7,391</strong></td>
+<td style="text-align: center;"><strong>$9,923</strong></td>
+<td style="text-align: center;"><strong>0.9053</strong></td>
+<td style="text-align: center;"><strong>1000.0</strong></td>
 </tr>
 </tbody>
 </table>
-<h3>6.3 Winner: Ridge Regression (alpha=1.0)</h3>
+<h3>6.3 Winner: Lasso Regression (alpha=1000.0)</h3>
 <ul>
-<li><strong>最低 CV MAE ($7,976)</strong> 與 <strong>最高 CV R² (0.9326)</strong></li>
-<li>L2 正則化有效抑制共線性造成的係數膨脹</li>
-<li>相比 Linear Regression 標準差更小 (0.0420 vs 0.0446)，穩定度更佳</li>
+<li><strong>最低 CV MAE ($7,391)</strong> 與 <strong>最高 CV R² (0.9394)</strong></li>
+<li>L1 正則化有效將不重要的 <code>State</code> 特徵係數壓縮至 exactamente 0，實現了特徵自動篩選並降低過擬合。</li>
+<li>相比 Linear Regression 與 Ridge 標準差更小 (0.0382)，在 CV folds 間表現最穩定。</li>
 </ul>
 <hr />
 <h2>7. Model Diagnostics</h2>
@@ -546,19 +546,19 @@
 <tr>
 <td>R&amp;D Spend</td>
 <td style="text-align: center;">+0.76</td>
-<td style="text-align: center;"><strong>+33,497</strong></td>
+<td style="text-align: center;"><strong>+34,884</strong></td>
 <td style="text-align: center;">✅ 可直接比較</td>
 </tr>
 <tr>
 <td>Marketing Spend</td>
 <td style="text-align: center;">+0.05</td>
-<td style="text-align: center;"><strong>+7,602</strong></td>
+<td style="text-align: center;"><strong>+5,554</strong></td>
 <td style="text-align: center;">✅</td>
 </tr>
 <tr>
 <td>Administration</td>
 <td style="text-align: center;">-0.06</td>
-<td style="text-align: center;"><strong>-1,268</strong></td>
+<td style="text-align: center;"><strong>-729</strong></td>
 <td style="text-align: center;">✅</td>
 </tr>
 </tbody>
@@ -602,18 +602,16 @@
 <p>[!NOTE]
 - VIF &lt; 5：無嚴重共線性
 - R&amp;D (3.47) 與 Marketing (3.57) 存在<strong>中度相關</strong>（源自原始 r=0.78）
-- Ridge 的 L2 正則化可自動處理此問題，無需刪除變數</p>
+- Lasso 能自動過濾此問題，並篩除不具貢獻的特徵變數</p>
 </blockquote>
 <h3>7.3 正則化軌跡</h3>
-<pre class="codehilite"><code>Ridge:  alpha=0.01 → CV R²=0.9308
-        alpha=0.1  → CV R²=0.9320
-        alpha=1.0  → CV R²=0.9326  ← best
-        alpha=10.0 → CV R²=0.9298
-        alpha=100  → CV R²=0.8921  (過度正則化)
+<div class="codehilite"><pre><span></span><code>Ridge:  alpha=0.01  → CV R²=0.9308
+        alpha=1.0   → CV R²=0.9326  ← best
+        alpha=1000  → CV R²=0.8590  (過度正則化)
 
-Lasso:  alpha=0.01 → CV R²=0.9304
-        alpha=100  → CV R²=0.9314  ← best (稀疏解逼近 Ridge)
-</code></pre>
+Lasso:  alpha=0.01  → CV R²=0.9304
+        alpha=1000  → CV R²=0.9394  ← best (變數稀疏，自動篩除 State)
+</code></pre></div>
 
 <hr />
 <h2>8. Model Evaluation</h2>
@@ -629,18 +627,18 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 <tbody>
 <tr>
 <td><strong>R²</strong></td>
-<td style="text-align: center;"><strong>0.9326</strong> ± 0.0420</td>
-<td style="text-align: center;">0.8592</td>
+<td style="text-align: center;"><strong>0.9394</strong> ± 0.0382</td>
+<td style="text-align: center;">0.9053</td>
 </tr>
 <tr>
 <td><strong>MAE</strong></td>
-<td style="text-align: center;"><strong>$7,976</strong></td>
-<td style="text-align: center;">$8,539</td>
+<td style="text-align: center;"><strong>$7,391</strong></td>
+<td style="text-align: center;">$7,144</td>
 </tr>
 <tr>
 <td><strong>RMSE</strong></td>
-<td style="text-align: center;"><strong>$10,436</strong></td>
-<td style="text-align: center;">$10,679</td>
+<td style="text-align: center;"><strong>$9,923</strong></td>
+<td style="text-align: center;">$8,759</td>
 </tr>
 </tbody>
 </table>
@@ -656,24 +654,24 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 <tbody>
 <tr>
 <td style="text-align: right;">$134,307</td>
-<td style="text-align: right;">$128,904</td>
-<td style="text-align: right;">$5,403</td>
+<td style="text-align: right;">$126,976</td>
+<td style="text-align: right;">$7,331</td>
 </tr>
 <tr>
 <td style="text-align: right;">$81,006</td>
-<td style="text-align: right;">$88,407</td>
-<td style="text-align: right;">-$7,401</td>
+<td style="text-align: right;">$85,204</td>
+<td style="text-align: right;">-$4,199</td>
 </tr>
 <tr>
 <td style="text-align: right;">$99,938</td>
-<td style="text-align: right;">$95,136</td>
-<td style="text-align: right;">$4,801</td>
+<td style="text-align: right;">$97,812</td>
+<td style="text-align: right;">$2,125</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h2>9. Feature Importance</h2>
-<p>使用<strong>標準化後的 Ridge 係數</strong>（可直接比較）：</p>
+<p>使用<strong>標準化後的 Lasso 係數</strong>（可直接比較）：</p>
 <table>
 <thead>
 <tr>
@@ -687,38 +685,38 @@ Lasso:  alpha=0.01 → CV R²=0.9304
 <tr>
 <td style="text-align: center;">1</td>
 <td><strong>R&amp;D Spend</strong></td>
-<td style="text-align: center;"><strong>+33,497</strong></td>
-<td>每增加 1 std R&amp;D，Profit 增加 $33.5K</td>
+<td style="text-align: center;"><strong>+34,884</strong></td>
+<td>每增加 1 std R&amp;D，Profit 增加 $34.9K</td>
 </tr>
 <tr>
 <td style="text-align: center;">2</td>
 <td>Marketing Spend</td>
-<td style="text-align: center;">+7,602</td>
+<td style="text-align: center;">+5,554</td>
 <td>次要正向因子</td>
 </tr>
 <tr>
 <td style="text-align: center;">3</td>
-<td>State_New York</td>
-<td style="text-align: center;">-3,647</td>
-<td>相較 California 略低</td>
+<td>Administration</td>
+<td style="text-align: center;">-729</td>
+<td>影響極小，輕微負向</td>
 </tr>
 <tr>
 <td style="text-align: center;">4</td>
 <td>State_Florida</td>
-<td style="text-align: center;">-3,119</td>
-<td>相較 California 略低</td>
+<td style="text-align: center;">0</td>
+<td>經 L1 收縮直接判定無顯著邊際貢獻</td>
 </tr>
 <tr>
 <td style="text-align: center;">5</td>
-<td>Administration</td>
-<td style="text-align: center;">-1,268</td>
-<td>影響最小，負向</td>
+<td>State_New York</td>
+<td style="text-align: center;">0</td>
+<td>經 L1 收縮直接判定無顯著邊際貢獻</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
 <p>[!IMPORTANT]
-R&amp;D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 <strong>4.4 倍</strong>，證實 R&amp;D 是獲利的最主要驅動力。</p>
+R&amp;D 的標準化係數 (34,884) 約為 Marketing (5,554) 的 <strong>6.3 倍</strong>，證實 R&amp;D 創新投入是獲利的最主要且最重要驅動力。</p>
 <p>Feature importance 圖表：<a href="./assets/feature_importance.png"><code>assets/feature_importance.png</code></a></p>
 </blockquote>
 <hr />
@@ -733,25 +731,26 @@ R&amp;D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 <strong>4.4 倍
 <tbody>
 <tr>
 <td>Mean</td>
-<td style="text-align: center;">$3,246</td>
+<td style="text-align: center;">$1,911</td>
 </tr>
 <tr>
 <td>Std</td>
-<td style="text-align: center;">$10,174</td>
+<td style="text-align: center;">$8,548</td>
 </tr>
 <tr>
 <td>Min</td>
-<td style="text-align: center;">-$15,531</td>
+<td style="text-align: center;">-$14,074</td>
 </tr>
 <tr>
 <td>Max</td>
-<td style="text-align: center;">$19,728</td>
+<td style="text-align: center;">$16,630</td>
 </tr>
 </tbody>
 </table>
 <ul>
 <li><strong>Residual Plot</strong>: 殘差隨機分布於零線兩側，無明顯異質變異</li>
-<li><strong>Q-Q Plot</strong>: 殘差近似常態分布（輕微右尾偏差）</li>
+<li><strong>Q-Q Plot</strong>: 殘差近似常態分布</li>
+<li>Lasso 模型的殘差指標均大幅優於無正則化的多元線性回歸</li>
 </ul>
 <blockquote>
 <p>Residual analysis 圖表：<a href="./assets/residual_analysis.png"><code>assets/residual_analysis.png</code></a></p>
@@ -759,12 +758,12 @@ R&amp;D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 <strong>4.4 倍
 <hr />
 <h2>11. Deployment — Streamlit App</h2>
 <h3>11.1 Architecture</h3>
-<pre class="codehilite"><code>User Input → Streamlit Frontend → Preprocessor (StandardScaler + OneHotEncoder)
+<div class="codehilite"><pre><span></span><code>User Input → Streamlit Frontend → Preprocessor (StandardScaler + OneHotEncoder)
                                        ↓
-                              Ridge Regression Model
+                               Lasso Regression Model
                                        ↓
-                              Profit Prediction → Plotly Dashboard
-</code></pre>
+                               Profit Prediction → Plotly Dashboard
+</code></pre></div>
 
 <h3>11.2 Technology Stack</h3>
 <table>
@@ -781,7 +780,7 @@ R&amp;D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 <strong>4.4 倍
 </tr>
 <tr>
 <td>ML Engine</td>
-<td>Scikit-Learn (Ridge, Pipeline)</td>
+<td>Scikit-Learn (Lasso, Pipeline)</td>
 </tr>
 <tr>
 <td>Visualization</td>
@@ -826,55 +825,60 @@ R&amp;D 的標準化係數 (33,497) 約為 Marketing (7,602) 的 <strong>4.4 倍
 </tr>
 </tbody>
 </table>
-<pre class="codehilite"><code>Predicted Profit: ~$180,500
-</code></pre>
+<div class="codehilite"><pre><span></span><code>Predicted Profit: ~$178,000
+</code></pre></div>
 
 <hr />
 <h2>12. Key Findings &amp; Business Insights</h2>
 <h3>Key Findings</h3>
 <ol>
-<li><strong>R&amp;D Spend</strong> 為最強預測因子（標準化係數 33,497，是 Marketing 的 4.4 倍）</li>
-<li><strong>Marketing Spend</strong> 為次要因子（7,602）</li>
-<li><strong>Administration</strong> 影響最小（-1,268），甚至呈輕微負向</li>
-<li><strong>State</strong> 影響有限（Florida -3,119, New York -3,647 vs California 基準）</li>
+<li><strong>R&amp;D Spend</strong> 為最強預測因子（標準化係數 34,884，是 Marketing 的 6.3 倍）</li>
+<li><strong>Marketing Spend</strong> 為次要因子（5,554）</li>
+<li><strong>Administration</strong> 影響極微（-729），呈輕微負向</li>
+<li><strong>State</strong> 被 L1 歸零，表明在控制預算後，州別對 Profit 無額外預測力</li>
 </ol>
 <h3>Business Insights</h3>
 <p>企業若希望提升獲利：</p>
 <ol>
-<li><strong>優先增加 R&amp;D 投資</strong> — 每 $1 投入約可帶來 $0.76 獲利</li>
-<li><strong>其次 Marketing</strong> — 仍有顯著正向效果</li>
-<li><strong>避免過度增加 Administration</strong> — 邊際效益極低且可能為負</li>
-<li><strong>地理位置非關鍵因素</strong> — 不應作為主要投資決策依據</li>
+<li><strong>優先增加 R&amp;D 創新投資</strong> — 其 ROI 具有最高回報潛能</li>
+<li><strong>行銷配置</strong> — 作為次要推動力以帶來正向收益</li>
+<li><strong>精簡行政營運費用</strong> — 降低無謂開銷，避免利潤被不必要的運作侵蝕</li>
+<li><strong>地理位置非關鍵因素</strong> — 不應為了州別差異而影響公司總部的預算配置決策</li>
 </ol>
 <h3>Model Formula (Standardized Scale)</h3>
-<pre class="codehilite"><code>Profit = 117,824
-        + 33,497 × Z(R&amp;D Spend)
-        + 7,602  × Z(Marketing Spend)
-        - 3,647  × State_New York
-        - 3,119  × State_Florida
-        - 1,268  × Z(Administration)
-</code></pre>
+<div class="codehilite"><pre><span></span><code>Profit = 115,652
+        + 34,884 × Z(R&amp;D Spend)
+        + 5,554  × Z(Marketing Spend)
+        - 729    × Z(Administration)
+</code></pre></div>
 
+<p><em>(State Florida &amp; New York coefficients were set to 0.0 by Lasso Regression and dropped from the equation)</em></p>
 <hr />
 <h2>13. Project Structure</h2>
-<pre class="codehilite"><code>50_Startups_Profit_Prediction/
-├── 50SPP.md                   # 本文件 — 專案摘要
-├── README.md                  # 快速入門說明
-├── data/50_Startups.csv       # 原始資料集
-├── notebooks/EDA.ipynb        # Jupyter Notebook
-├── src/eda.py                 # EDA + 模型訓練腳本
-├── app.py                     # Streamlit Web 應用程式
-├── index.html                 # HTML 簡報
-├── assets/*.png               # 視覺化圖表
-└── requirements.txt           # 相依套件
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="mf">50</span><span class="n">_Startups_Profit_Prediction</span><span class="o">/</span>
+<span class="err">├──</span><span class="w"> </span><span class="mf">50</span><span class="n">SPP</span><span class="mf">.</span><span class="n">md</span><span class="w">                   </span><span class="err">#</span><span class="w"> </span><span class="n">本文件</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">專案摘要</span>
+<span class="err">├──</span><span class="w"> </span><span class="mf">50</span><span class="n">PP</span><span class="mf">.</span><span class="n">md</span><span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">專案摘要</span><span class="w"> </span><span class="p">(</span><span class="n">備份</span><span class="p">)</span>
+<span class="err">├──</span><span class="w"> </span><span class="kr">READ</span><span class="n">ME</span><span class="mf">.</span><span class="n">md</span><span class="w">                  </span><span class="err">#</span><span class="w"> </span><span class="n">快速入門說明</span>
+<span class="err">├──</span><span class="w"> </span><span class="kd">data</span><span class="o">/</span><span class="mf">50</span><span class="n">_Startups</span><span class="mf">.</span><span class="n">csv</span><span class="w">       </span><span class="err">#</span><span class="w"> </span><span class="n">原始資料集</span>
+<span class="err">├──</span><span class="w"> </span><span class="ow">not</span><span class="n">ebooks</span><span class="o">/</span><span class="n">EDA</span><span class="mf">.</span><span class="n">ipynb</span><span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">Jupyter</span><span class="w"> </span><span class="ow">Not</span><span class="n">ebook</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">src</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">eda</span><span class="mf">.</span><span class="n">py</span><span class="w">                 </span><span class="err">#</span><span class="w"> </span><span class="n">EDA</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">特徵選擇腳本</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">model_selection_10_schemes</span><span class="mf">.</span><span class="n">py</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="mf">10</span><span class="w"> </span><span class="n">種模型選擇評估腳本</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">reports</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">model_selection_comparison</span><span class="mf">.</span><span class="n">md</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">特徵選擇比較分析報告</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">model_selection_10_schemes</span><span class="mf">.</span><span class="n">md</span><span class="w">   </span><span class="err">#</span><span class="w"> </span><span class="mf">10</span><span class="w"> </span><span class="n">種驗證方案對比報告</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">app</span><span class="mf">.</span><span class="n">py</span><span class="w">                     </span><span class="err">#</span><span class="w"> </span><span class="n">Streamlit</span><span class="w"> </span><span class="n">Web</span><span class="w"> </span><span class="n">應用程式</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">index</span><span class="mf">.</span><span class="n">html</span><span class="w">                 </span><span class="err">#</span><span class="w"> </span><span class="n">HTML</span><span class="w"> </span><span class="n">簡報</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">assets</span><span class="o">/*</span><span class="mf">.</span><span class="n">png</span><span class="w">               </span><span class="err">#</span><span class="w"> </span><span class="n">視覺化圖表</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">requirements</span><span class="mf">.</span><span class="n">txt</span><span class="w">           </span><span class="err">#</span><span class="w"> </span><span class="n">相依套件</span>
+</code></pre></div>
 
 <hr />
 <h2>14. Getting Started</h2>
-<pre class="codehilite"><code class="language-bash">pip install -r requirements.txt
-python src/eda.py              # 執行完整分析
-streamlit run app.py           # 啟動 Web 應用
-</code></pre>
+<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+python<span class="w"> </span>src/eda.py<span class="w">              </span><span class="c1"># 執行完整分析</span>
+streamlit<span class="w"> </span>run<span class="w"> </span>app.py<span class="w">           </span><span class="c1"># 啟動 Web 應用</span>
+</code></pre></div>
 
 <hr />
 <h2>Appendix</h2>
@@ -914,12 +918,12 @@ streamlit run app.py           # 啟動 Web 應用
 </tbody>
 </table>
 <h3>Tech Stack</h3>
-<pre class="codehilite"><code>Python 3.14 · Scikit-Learn 1.3+ · Streamlit 1.28+ · Plotly 5.15+ · statsmodels 0.14+
-</code></pre>
+<div class="codehilite"><pre><span></span><code>Python 3.14 · Scikit-Learn 1.3+ · Streamlit 1.28+ · Plotly 5.15+ · statsmodels 0.14+
+</code></pre></div>
 
 <hr />
 <blockquote>
-<p><strong>Built with CRISP-DM Methodology · 5-Fold Cross-Validation · Ridge Regularization · 2026</strong></p>
+<p><strong>Built with CRISP-DM Methodology · 5-Fold Cross-Validation · Lasso Regularization · 2026</strong></p>
 </blockquote>
 </body>
 </html>

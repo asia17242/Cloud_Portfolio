@@ -71,8 +71,8 @@ def train_and_select_model():
 
     models_to_compare = {
         'Linear Regression': (LinearRegression(), {}),
-        'Ridge': (Ridge(random_state=42), {'alpha': [0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0]}),
-        'Lasso': (Lasso(random_state=42), {'alpha': [0.01, 0.1, 1.0, 5.0, 10.0, 50.0, 100.0]})
+        'Ridge': (Ridge(random_state=42), {'alpha': np.logspace(-3, 3, 13).tolist()}),
+        'Lasso': (Lasso(random_state=42), {'alpha': np.logspace(-3, 3, 13).tolist()})
     }
 
     comparison = []
@@ -191,6 +191,8 @@ if lang == "繁體中文":
         'cv_mae': "CV MAE (5 折平均絕對誤差)",
         'cv_rmse': "CV RMSE (5 折均方根誤差)",
         'model_comparison': "多模型效能對比 (5-Fold Cross-Validation)",
+        'model_selection_10_schemes': "10 種模型選擇驗證方案對比 (10 Model Validation Schemes)",
+        'feature_selection_comparison': "特徵選擇演算法對比分析 (Feature Selection Comparison)",
         'feature_importance': "特徵重要性 — 標準化係數 (Feature Importance)",
         'feature_importance_desc': "提示：標準化係數可直接比較大小。絕對值越大，代表該支出對獲利 (Profit) 的邊際影響力越大。",
         'model_formula': "模型數學公式 (標準化尺度 Model Formula)",
@@ -261,6 +263,8 @@ else:
         'cv_mae': "CV MAE (5-Fold)",
         'cv_rmse': "CV RMSE (5-Fold)",
         'model_comparison': "Model Comparison (5-Fold Cross-Validation)",
+        'model_selection_10_schemes': "10 Model Validation Schemes Comparison",
+        'feature_selection_comparison': "Feature Selection Comparison & Rankings",
         'feature_importance': "Feature Importance (Standardized Coefficients)",
         'feature_importance_desc': "Standardized coefficients are directly comparable: a larger absolute value indicates greater relative importance.",
         'model_formula': "Model Formula (Standardized Scale)",
@@ -399,6 +403,14 @@ elif page == t['eval_tab']:
             'Best Alpha': alpha_str
         })
     st.table(pd.DataFrame(comp_rows))
+
+    # Add 10 Validation Schemes comparison chart
+    st.subheader(t['model_selection_10_schemes'])
+    st.image('assets/model_selection_10_schemes.png', use_container_width=True)
+
+    # Add Feature Selection comparison chart
+    st.subheader(t['feature_selection_comparison'])
+    st.image('assets/model_selection_comparison.png', use_container_width=True)
 
     st.subheader(t['feature_importance'])
     coef_df = pd.DataFrame({

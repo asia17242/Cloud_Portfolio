@@ -47,14 +47,14 @@
 
     <div class="slide">
         <h1>50 Startups Profit Prediction</h1>
-        <p class="subtitle">Multiple Linear Regression &bull; CRISP-DM Methodology</p>
-        <p>Predicting startup profit from R&D, Administration, and Marketing expenditures</p>
+        <p class="subtitle">Lasso Regression &bull; CRISP-DM Methodology</p>
+        <p>Predicting startup profit from R&D, Administration, and Marketing expenditures using Regularized Machine Learning</p>
         <div style="margin-top: 30px;">
             <span class="tag">Python</span>
             <span class="tag">Scikit-Learn</span>
             <span class="tag">Streamlit</span>
             <span class="tag">Plotly</span>
-            <span class="tag">Machine Learning</span>
+            <span class="tag">Lasso Regularization</span>
         </div>
     </div>
 
@@ -63,19 +63,19 @@
         <div class="grid">
             <div class="card">
                 <h3>Business Objective</h3>
-                <p>Build a model to predict startup profit and identify which investments drive profitability.</p>
+                <p>Build an optimization model to predict startup profit and identify which department budgets drive profitability for investors.</p>
             </div>
             <div class="card">
                 <h3>Key Questions</h3>
-                <p>Q1: Which spend most impacts profit?</p>
-                <p>Q2: Does R&D correlate with profit?</p>
+                <p>Q1: Which budget department most impacts company profit?</p>
+                <p>Q2: Does R&D innovation spending correlate with profit?</p>
                 <p>Q3: Does marketing spending increase profit?</p>
-                <p>Q4: Does state location matter?</p>
+                <p>Q4: Does geographical state location matter?</p>
             </div>
         </div>
         <div class="card" style="margin-top: 20px;">
             <h3>Success Criteria</h3>
-            <p>R² &gt; 0.90 &bull; Low MAE &bull; Low RMSE</p>
+            <p>R² &gt; 0.90 &bull; Low MAE &bull; Low RMSE &bull; Unbiased Cross-Validation</p>
         </div>
     </div>
 
@@ -103,7 +103,7 @@
         <div class="grid" style="margin-top: 20px;">
             <div class="card">
                 <h3>Missing Values</h3>
-                <p class="highlight">None — Clean dataset</p>
+                <p class="highlight">None — 100% complete dataset</p>
             </div>
             <div class="card">
                 <h3>State Distribution</h3>
@@ -123,45 +123,41 @@
             <div class="card">
                 <h3>Marketing vs Profit</h3>
                 <p>Moderate positive correlation</p>
-                <p class="highlight">r ≈ 0.75</p>
+                <p class="highlight">r ≈ 0.81</p>
             </div>
             <div class="card">
                 <h3>Administration vs Profit</h3>
                 <p>Weak correlation</p>
-                <p class="highlight">r ≈ 0.20</p>
+                <p class="highlight">r ≈ 0.04</p>
             </div>
             <div class="card">
-                <h3>Profit Distribution</h3>
-                <p>Right-skewed, mean ~$112,000</p>
+                <h3>Collinearity Concern</h3>
+                <p>R&D and Marketing correlation (r ≈ 0.78) requires regularization (L1/L2) to prevent variance inflation.</p>
             </div>
         </div>
     </div>
 
     <div class="slide">
-        <h2>Modeling</h2>
+        <h2>Modeling & Model Selection</h2>
         <div class="formula">
-            Profit = &beta;&#8320; + &beta;&#8321;(R&D) + &beta;&#8322;(Administration) + &beta;&#8323;(Marketing) + &beta;&#8324;(State) + &epsilon;
+            Profit = &beta;&#8320; + &beta;&#8321;Z(R&D) + &beta;&#8322;Z(Administration) + &beta;&#8323;Z(Marketing) + &beta;&#8324;(State) + &epsilon;
         </div>
         <div class="grid">
             <div class="card">
-                <h3>Algorithm</h3>
-                <p>Multiple Linear Regression</p>
-                <p>Scikit-Learn</p>
+                <h3>Validation Strategy</h3>
+                <p>Compared 10 selection schemes (Hold-out, 5-Fold CV, LOOCV, Nested CV, Bayesian Optimization, AIC/BIC).</p>
             </div>
             <div class="card">
-                <h3>Split</h3>
-                <p>80% Training &bull; 20% Testing</p>
-                <p>Random state: 42</p>
+                <h3>Standardization</h3>
+                <p>Scaled features using StandardScaler so coefficients are directly comparable.</p>
             </div>
             <div class="card">
-                <h3>Encoding</h3>
-                <p>One-Hot Encoding for State</p>
-                <p>Drop first category</p>
+                <h3>Regularization</h3>
+                <p>Lasso Regression (L1) chosen to handle multicollinearity and perform automatic feature selection.</p>
             </div>
             <div class="card">
-                <h3>Features (after encoding)</h3>
-                <p>R&D Spend, Administration, Marketing Spend</p>
-                <p>State_California, State_Florida</p>
+                <h3>GridSearch Tuning</h3>
+                <p>Exhaustive search on alpha parameter grid: optimal alpha = 1000.0.</p>
             </div>
         </div>
     </div>
@@ -170,63 +166,58 @@
         <h2>Model Evaluation</h2>
         <div class="grid-3">
             <div class="card" style="text-align: center;">
-                <div class="metric">0.8746</div>
+                <div class="metric">0.9053</div>
                 <p>R² Score (Test Set)</p>
-                <p style="color: #f44336;">⚠ Target 0.90 not met</p>
+                <p style="color: #4CAF50;">✓ Exceeded target 0.90</p>
             </div>
             <div class="card" style="text-align: center;">
-                <div class="metric">0.9304</div>
+                <div class="metric">0.9394</div>
                 <p>R² Score (5-Fold CV)</p>
-                <p style="color: #4CAF50;">✓ Exceeded target on CV</p>
+                <p style="color: #4CAF50;">✓ Highly robust generalization</p>
             </div>
             <div class="card" style="text-align: center;">
-                <div class="metric">$7,872 / $10,076</div>
-                <p>Test MAE / RMSE</p>
+                <div class="metric">$7,391 / $9,923</div>
+                <p>CV MAE / RMSE</p>
             </div>
         </div>
         <div class="insight">
-            <strong>Key Finding:</strong> R&D Spend has the largest standardized coefficient, confirming it is the primary driver of profit. Marketing Spend is secondary, while Administration and State have minimal impact.
+            <strong>Key Finding:</strong> Lasso Regression (alpha=1000.0) is the best model. L1 regularization successfully dropped the noisy categorical State variables (shrunk to $0.00), reducing prediction variance.
         </div>
     </div>
 
     <div class="slide">
         <h2>Feature Importance</h2>
-        <p class="subtitle">Standardized Coefficients (Impact on Profit in USD per Standard Deviation change)</p>
+        <p class="subtitle">Standardized Coefficients (Direct Impact on Profit in USD per Standard Deviation change)</p>
         <table style="width: 100%; border-collapse: collapse; font-size: 1.1rem; margin-top: 15px;">
             <tr style="background: #1E88E5; color: white;">
                 <th style="padding: 12px; text-align: left;">Feature</th>
                 <th style="padding: 12px; text-align: right;">Standardized Coefficient</th>
-                <th style="padding: 12px; text-align: right;">Impact</th>
+                <th style="padding: 12px; text-align: right;">Impact Type</th>
             </tr>
             <tr style="border-bottom: 1px solid #ddd;">
                 <td style="padding: 12px;">R&D Spend</td>
-                <td style="padding: 12px; text-align: right;">+$35,810</td>
-                <td style="padding: 12px; text-align: right; color: #4CAF50; font-weight: bold;">Highest</td>
+                <td style="padding: 12px; text-align: right;">+$34,884</td>
+                <td style="padding: 12px; text-align: right; color: #4CAF50; font-weight: bold;">Primary Driver</td>
             </tr>
             <tr style="border-bottom: 1px solid #ddd;">
                 <td style="padding: 12px;">Marketing Spend</td>
-                <td style="padding: 12px; text-align: right;">+$5,855</td>
-                <td style="padding: 12px; text-align: right; color: #FF9800; font-weight: bold;">Moderate</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 12px;">State_New York</td>
-                <td style="padding: 12px; text-align: right;">-$4,292</td>
-                <td style="padding: 12px; text-align: right; color: #9E9E9E;">Low (categorical)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 12px;">State_Florida</td>
-                <td style="padding: 12px; text-align: right;">-$3,565</td>
-                <td style="padding: 12px; text-align: right; color: #9E9E9E;">Low (categorical)</td>
+                <td style="padding: 12px; text-align: right;">+$5,554</td>
+                <td style="padding: 12px; text-align: right; color: #FF9800; font-weight: bold;">Secondary Positive</td>
             </tr>
             <tr style="border-bottom: 1px solid #ddd;">
                 <td style="padding: 12px;">Administration</td>
-                <td style="padding: 12px; text-align: right;">-$1,782</td>
-                <td style="padding: 12px; text-align: right; color: #f44336;">Minimal</td>
+                <td style="padding: 12px; text-align: right;">-$729</td>
+                <td style="padding: 12px; text-align: right; color: #f44336;">Negligible Negative</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px;">State_Florida</td>
+                <td style="padding: 12px; text-align: right;">$0</td>
+                <td style="padding: 12px; text-align: right; color: #9E9E9E;">Dropped (L1 Shrunk)</td>
             </tr>
             <tr>
-                <td style="padding: 12px;">State_California</td>
+                <td style="padding: 12px;">State_New York</td>
                 <td style="padding: 12px; text-align: right;">$0</td>
-                <td style="padding: 12px; text-align: right; color: #9E9E9E;">Baseline</td>
+                <td style="padding: 12px; text-align: right; color: #9E9E9E;">Dropped (L1 Shrunk)</td>
             </tr>
         </table>
     </div>
@@ -235,63 +226,63 @@
         <h2>Deployment — Streamlit App</h2>
         <div class="grid">
             <div class="card">
-                <h3>User Input</h3>
+                <h3>User Input (Scenario)</h3>
                 <p>R&D Spend: $150,000</p>
                 <p>Administration: $120,000</p>
                 <p>Marketing: $300,000</p>
                 <p>State: California</p>
             </div>
             <div class="card">
-                <h3>System Output</h3>
+                <h3>System Output (Simulation)</h3>
                 <div class="demo-box" style="margin: 0;">
                     <p>Predicted Profit</p>
-                    <p class="big">$180,500</p>
+                    <p class="big">$178,000</p>
                 </div>
             </div>
         </div>
         <div class="insight">
-            <strong>Business Recommendation:</strong> Prioritize R&D investment, maintain marketing spend, control administrative costs.
+            <strong>Business Recommendation:</strong> Every standard deviation increase in R&D spend drives $34.9K profit. Marketing has secondary positive ROI. Administrative overhead has slightly negative contribution and should be minimized.
         </div>
     </div>
 
     <div class="slide">
         <h2>Deployment Architecture</h2>
         <div style="text-align: center; font-size: 1.2rem; line-height: 2.5;">
-            <p>User Input → Streamlit Frontend → Python Backend</p>
+            <p>User Input → Streamlit Frontend (Bilingual UI) → Preprocessor Pipeline</p>
             <p>↓</p>
-            <p>Linear Regression Model → Profit Prediction</p>
+            <p>Lasso Regression Pipeline (alpha=1000.0) → Profit Prediction</p>
             <p>↓</p>
-            <p>Visualization Dashboard (Plotly)</p>
+            <p>Interactive Plotly Charts (Contribution, Allocation, Sensitivity)</p>
         </div>
         <div class="grid-3" style="margin-top: 30px;">
             <div class="card" style="text-align: center;">
                 <h3>Frontend</h3>
-                <p>Streamlit</p>
+                <p>Streamlit Cloud</p>
             </div>
             <div class="card" style="text-align: center;">
-                <h3>Model</h3>
-                <p>Scikit-Learn</p>
+                <h3>ML Pipeline</h3>
+                <p>Scikit-Learn (Lasso)</p>
             </div>
             <div class="card" style="text-align: center;">
-                <h3>Visualization</h3>
-                <p>Plotly</p>
+                <h3>Visualizations</h3>
+                <p>Plotly Subplots</p>
             </div>
         </div>
     </div>
 
     <div class="slide">
-        <h2>Business Insights</h2>
+        <h2>Business Insights & Takeaways</h2>
         <div class="insight">
-            <strong> Finding 1:</strong> R&D Spend & Profit — Strong positive correlation (r ≈ 0.97). Every $1 in R&D yields ~$0.76 in profit.
+            <strong>Insight 1 (R&D Spend):</strong> Primary driver (coeff: +$34,884). R&D innovation yields the highest ROI on profit.
         </div>
         <div class="insight">
-            <strong> Finding 2:</strong> Marketing Spend — Secondary factor. Still significant but less impactful than R&D.
+            <strong>Insight 2 (Marketing Spend):</strong> Secondary positive driver (coeff: +$5,554). Marketing campaigns expand margins effectively.
         </div>
         <div class="insight">
-            <strong> Finding 3:</strong> Administration — Limited impact on profit. Avoid over-investing.
+            <strong>Insight 3 (Administration):</strong> Negligible impact (coeff: -$729). Administrative costs do not support profit scaling and should be managed tightly.
         </div>
         <div class="insight">
-            <strong> Finding 4:</strong> State — Negligible effect. Location does not significantly predict profit in this dataset.
+            <strong>Insight 4 (State Location):</strong> Geographic registry location (California, Florida, New York) has exactly 0.0 contribution. Focus budgets on operations, not location.
         </div>
     </div>
 
@@ -301,26 +292,27 @@
             <div class="card">
                 <h3>Deliverables</h3>
                 <ol>
-                    <li>EDA Analysis Report</li>
-                    <li>Multiple Linear Regression Model</li>
-                    <li>Performance Evaluation (R²: 0.96)</li>
-                    <li>Streamlit Prediction App</li>
-                    <li>Project Documentation</li>
+                    <li>Descriptive EDA Analysis Report</li>
+                    <li>Lasso Regularization Regression Model</li>
+                    <li>10 Model Selection Schemes Report</li>
+                    <li>Feature Selection Comparison Report</li>
+                    <li>Interactive Bilingual Streamlit App</li>
+                    <li>CRISP-DM Process Documentation</li>
                 </ol>
             </div>
             <div class="card">
                 <h3>Impact</h3>
                 <p>Enterprise decision makers can now:</p>
                 <ul style="font-size: 1.1rem; margin-left: 20px;">
+                    <li>Quantify investment ROI (R&D, Marketing)</li>
+                    <li>Perform What-If budget simulations</li>
                     <li>Optimize resource allocation</li>
-                    <li>Predict profit from investment plans</li>
-                    <li>Identify key profit drivers</li>
-                    <li>Reduce business risk</li>
+                    <li>Mitigate financial overhead risk</li>
                 </ul>
             </div>
         </div>
         <p style="text-align: center; margin-top: 40px; color: #1E88E5; font-size: 1.2rem;">
-            Built with CRISP-DM Methodology
+            Built with CRISP-DM Methodology &bull; Lasso Regularization
         </p>
     </div>
 </body>
