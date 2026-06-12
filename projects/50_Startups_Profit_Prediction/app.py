@@ -12,6 +12,10 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from pathlib import Path
+
+# Base directory — works on both local and Streamlit Cloud
+BASE_DIR = Path(__file__).parent
 
 st.set_page_config(
     page_title="50 Startups Profit Prediction",
@@ -406,11 +410,11 @@ elif page == t['eval_tab']:
 
     # Add 10 Validation Schemes comparison chart
     st.subheader(t['model_selection_10_schemes'])
-    st.image('assets/model_selection_10_schemes.png', use_container_width=True)
+    st.image(str(BASE_DIR / 'assets' / 'model_selection_10_schemes.png'), use_container_width=True)
 
     # Add Feature Selection comparison chart
     st.subheader(t['feature_selection_comparison'])
-    st.image('assets/model_selection_comparison.png', use_container_width=True)
+    st.image(str(BASE_DIR / 'assets' / 'model_selection_comparison.png'), use_container_width=True)
 
     st.subheader(t['feature_importance'])
     coef_df = pd.DataFrame({
